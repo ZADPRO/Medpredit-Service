@@ -187,6 +187,6 @@ export const USGAbdmen = (answers: any, mappedResult: any) => {
       echopreviousvalue,
       corticopreviousvalue,
     ],
-    category: [""],
+    investigationDataCategory: ["225", "228", "231", "234"],
   };
 };

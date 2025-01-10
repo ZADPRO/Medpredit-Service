@@ -335,6 +335,7 @@ const insertInvestigationPreviousValues = async (
   const createdAt = CurrentTime();
 
   const PTcreatedDate = getDateOnly();
+
   result.investigationData.map(async (element) => {
     if (element.flag === "ui" || element.flag === "db") {
       await connection.query(insertInvestigationDetails, [
@@ -810,42 +811,72 @@ export const postAnswersModels = async (
       score = result.score;
       multiCategoryId = ["223"];
     } else if (categoryId === "224") {
-      let result = USGAbdmen(answers, mappedResult);
+      let result: any = USGAbdmen(answers, mappedResult);
+
+      console.log(result);
+
+      result.investigationDataCategory.forEach((cat, index) => {
+        if (result.investigationData[index].answer.length > 0) {
+          insertInvestigationPreviousValues(
+            { investigationData: result.investigationData[index].answer },
+            createdBy,
+            patientId,
+            cat
+          );
+        }
+      });
+
+      score = result.score;
+      multiCategoryId = [
+        "224",
+        "225",
+        "226",
+        "227",
+        "228",
+        "229",
+        "230",
+        "231",
+        "232",
+        "233",
+        "234",
+        "235",
+        "236",
+      ];
     }
 
-    // const getlatestPTId = await connection.query(getLatestPTIdQuery);
+    const getlatestPTId = await connection.query(getLatestPTIdQuery);
 
-    // let lastestPTId = 1;
+    let lastestPTId = 1;
 
-    // if (getlatestPTId.rows.length > 0) {
-    //   lastestPTId = parseInt(getlatestPTId.rows[0].refPTId) + 1;
-    // }
+    if (getlatestPTId.rows.length > 0) {
+      lastestPTId = parseInt(getlatestPTId.rows[0].refPTId) + 1;
+    }
 
-    // await Promise.all(
-    //   score.map(async (element, index) => {
-    //     console.log(lastestPTId + index, element, multiCategoryId[index]);
+    await Promise.all(
+      score.map(async (element, index) => {
+        console.log(lastestPTId + index, element, multiCategoryId[index]);
 
-    //     await connection.query(addPatientTransactionQuery, [
-    //       lastestPTId + index,
-    //       mapId,
-    //       element,
-    //       "1",
-    //       PTcreatedDate,
-    //       createdAt,
-    //       createdBy,
-    //     ]);
+        await connection.query(addPatientTransactionQuery, [
+          lastestPTId + index,
+          mapId,
+          element,
+          "1",
+          PTcreatedDate,
+          createdAt,
+          createdBy,
+        ]);
 
-    //     await connection.query(addUserScoreDetailsQuery, [
-    //       lastestPTId + index,
-    //       multiCategoryId[index],
-    //       createdAt,
-    //       createdBy,
-    //     ]);
-    //   })
-    // );
+        await connection.query(addUserScoreDetailsQuery, [
+          lastestPTId + index,
+          multiCategoryId[index],
+          createdAt,
+          createdBy,
+        ]);
+      })
+    );
 
     return {
-      status: false,
+      status: true,
     };
   } catch (error) {
     await connection.query("ROLLBACK;");
@@ -924,7 +955,7 @@ export const postFamilyUserModel = async (values: any) => {
     await connection.query(postnewUserDomain, newUserDomainValue);
 
     return {
-      status: false,
+      status: true,
     };
   } catch (error) {
     await connection.query("ROLLBACK;");
@@ -1202,6 +1233,26 @@ export const resetScoreModel = async (
     } else if (refQCategoryId === 223) {
       multiCategoryId = ["223"];
       await connection.query(resetScoreInvestigationDetails, [refQCategoryId]);
+    } else if (refQCategoryId === 224) {
+      multiCategoryId = [
+        "224",
+        "225",
+        "226",
+        "227",
+        "228",
+        "229",
+        "230",
+        "231",
+        "232",
+        "233",
+        "234",
+        "235",
+        "236",
+      ];
+      await connection.query(resetScoreInvestigationDetails, [330]);
+      await connection.query(resetScoreInvestigationDetails, [336]);
+      await connection.query(resetScoreInvestigationDetails, [340]);
+      await connection.query(resetScoreInvestigationDetails, [330]);
     }
 
     await Promise.all(

@@ -195,6 +195,66 @@ export const getCurrentReportDataModel = async (
       refPTcreatedDate,
     ]);
 
+    const kr = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "225",
+      refPTcreatedDate,
+    ]);
+
+    const kl = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "228",
+      refPTcreatedDate,
+    ]);
+
+    const echo = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "231",
+      refPTcreatedDate,
+    ]);
+
+    const cortico = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "234",
+      refPTcreatedDate,
+    ]);
+
+    const bloodurea = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "218",
+      refPTcreatedDate,
+    ]);
+
+    const serum = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "219",
+      refPTcreatedDate,
+    ]);
+
+    const egfr = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "220",
+      refPTcreatedDate,
+    ]);
+
+    const urinesugar = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "221",
+      refPTcreatedDate,
+    ]);
+
+    const urinealbumin = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "222",
+      refPTcreatedDate,
+    ]);
+
+    const urineketones = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "223",
+      refPTcreatedDate,
+    ]);
+
     return {
       doctorDetail: {
         doctorName: doctor.refUserFname + " " + doctor.refUserLname,
@@ -227,6 +287,16 @@ export const getCurrentReportDataModel = async (
       hdl: hdl.rows,
       ldl: ldl.rows,
       tchdl: tchdl.rows,
+      kr: kr.rows,
+      kl: kl.rows,
+      echo: echo.rows,
+      cortico: cortico.rows,
+      bloodurea: bloodurea.rows,
+      serum: serum.rows,
+      egfr: egfr.rows,
+      urinesugar: urinesugar.rows,
+      urinealbumin: urinealbumin.rows,
+      urineketones: urineketones.rows,
     };
   } catch (error) {
     console.error("Something went Wrong", error);
@@ -333,6 +403,133 @@ export const getPastReportDataModel = async (
       reportDate,
     ]);
 
+    let refPTcreatedDate = reportDate;
+
+    const rbs = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "202",
+      refPTcreatedDate,
+    ]);
+
+    const fbs = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "203",
+      refPTcreatedDate,
+    ]);
+
+    const ppbs = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "204",
+      refPTcreatedDate,
+    ]);
+
+    const ogtt = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "205",
+      refPTcreatedDate,
+    ]);
+
+    const gct = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "206",
+      refPTcreatedDate,
+    ]);
+
+    const hba1c = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "207",
+      refPTcreatedDate,
+    ]);
+
+    const fastingcholesterol = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "213",
+      refPTcreatedDate,
+    ]);
+
+    const fastingtriglycerides = await connection.query(
+      getCurrentInvestigation,
+      [patientId, "214", refPTcreatedDate]
+    );
+
+    const hdl = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "215",
+      refPTcreatedDate,
+    ]);
+
+    const ldl = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "216",
+      refPTcreatedDate,
+    ]);
+
+    const tchdl = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "217",
+      refPTcreatedDate,
+    ]);
+
+    const kr = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "225",
+      refPTcreatedDate,
+    ]);
+
+    const kl = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "228",
+      refPTcreatedDate,
+    ]);
+
+    const echo = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "231",
+      refPTcreatedDate,
+    ]);
+
+    const cortico = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "234",
+      refPTcreatedDate,
+    ]);
+
+    const bloodurea = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "218",
+      refPTcreatedDate,
+    ]);
+
+    const serum = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "219",
+      refPTcreatedDate,
+    ]);
+
+    const egfr = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "220",
+      refPTcreatedDate,
+    ]);
+
+    const urinesugar = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "221",
+      refPTcreatedDate,
+    ]);
+
+    const urinealbumin = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "222",
+      refPTcreatedDate,
+    ]);
+
+    const urineketones = await connection.query(getCurrentInvestigation, [
+      patientId,
+      "223",
+      refPTcreatedDate,
+    ]);
+
     return {
       doctorDetail: {
         doctorName: doctor.refUserFname + " " + doctor.refUserLname,
@@ -354,6 +551,27 @@ export const getPastReportDataModel = async (
       allScoreVerify: getAllScoreVerify.rows,
       stressAnswer: getStressAnswer.rows,
       treatmentDetails: TreatmentDetails.rows,
+      rbs: rbs.rows,
+      fbs: fbs.rows,
+      ppbs: ppbs.rows,
+      ogtt: ogtt.rows,
+      gct: gct.rows,
+      hba1c: hba1c.rows,
+      fastingcholesterol: fastingcholesterol.rows,
+      fastingtriglycerides: fastingtriglycerides.rows,
+      hdl: hdl.rows,
+      ldl: ldl.rows,
+      tchdl: tchdl.rows,
+      kr: kr.rows,
+      kl: kl.rows,
+      echo: echo.rows,
+      cortico: cortico.rows,
+      bloodurea: bloodurea.rows,
+      serum: serum.rows,
+      egfr: egfr.rows,
+      urinesugar: urinesugar.rows,
+      urinealbumin: urinealbumin.rows,
+      urineketones: urineketones.rows,
     };
   } catch (error) {
     console.error("Something went Wrong", error);
