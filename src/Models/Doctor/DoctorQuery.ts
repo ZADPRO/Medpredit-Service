@@ -179,3 +179,32 @@ FROM
 export const getAllCategoryFamilyHistory = `
   SELECT * FROM public."refCategory" rc WHERE rc."refQSubCategory" = '51'
   `;
+
+export const getDiagnosisQuery = `
+  SELECT
+  *
+FROM
+  public."refPatientTransaction" rpt
+  FULL JOIN public."refUserScoreDetail" rusd ON rusd."refPTId" = CAST(rpt."refPTId" AS TEXT)
+  FULL JOIN public."refPatientMap" rpm ON rpm."refPMId" = CAST(rpt."refPMId" AS INTEGER)
+WHERE
+  DATE(rpt."refPTcreatedDate") = $1
+  AND rpm."refPatientId" = $2
+  AND rusd."refQCategoryId" IN ('103', '203', '204', '202', '207');
+  `;
+
+export const getDiagnosisTreatmentQuery = `
+  SELECT
+  EXISTS (
+    SELECT
+      1
+    FROM
+      public."refTreatmentDetails" rtd
+    JOIN public."refPatientMap" rpm 
+      ON rpm."refPMId" = CAST(rtd."refPMId" AS INTEGER)
+    WHERE
+      DATE(rtd."refTDCreatedDate") = DATE($1)
+      AND rpm."refPatientId" = $2
+      AND rtd."refTDCat" = 'Anti-diabetic'
+  ) AS treatementDetails;
+  `;

@@ -1,4 +1,6 @@
+import { log } from "console";
 import { calculateAge, getDateOnly } from "../../Helper/CurrentTime";
+import { Diabetes } from "../../Helper/Formula/Diagnosis/Diabetes";
 import {
   addPatientTransactionQuery,
   addUserScoreDetailsQuery,
@@ -11,6 +13,8 @@ import {
   getAllCategoryQuery,
   getAllScoreQuery,
   getAllScoreVerifyQuery,
+  getDiagnosisQuery,
+  getDiagnosisTreatmentQuery,
   getDoctorDetailsReport,
   getParticualarScoreQuery,
   getPatientDetailsReport,
@@ -314,17 +318,35 @@ export const createReportModel = async (
 ) => {
   const connection = await DB();
   try {
-    const patientMapId = await connection.query(getDoctorPatientMapQuery, [
+    const refPTcreatedDate = getDateOnly();
+
+    const scoreResult = await connection.query(getDiagnosisQuery, [
+      refPTcreatedDate,
       patientId,
-      doctorId,
-      hospitalId,
     ]);
 
-    const PTcreatedDate = getDateOnly();
+    const treatmentDetails = await connection.query(
+      getDiagnosisTreatmentQuery,
+      [refPTcreatedDate, patientId]
+    );
+
+    const diabetesResult = Diabetes(
+      scoreResult.rows,
+      treatmentDetails.rows[0].treatementdetails
+    );
+
+    let score = [diabetesResult];
+    let multiCategoryId = ["237"];
 
     const createdAt = CurrentTime();
 
-    const createdBy = employee;
+    const map = await connection.query(checkPatientMapQuery, [
+      doctorId,
+      patientId,
+      hospitalId,
+    ]);
+
+    const mapId = map.rows[0].refPMId;
 
     const getlatestPTId = await connection.query(getLatestPTIdQuery);
 
@@ -334,8 +356,45 @@ export const createReportModel = async (
       lastestPTId = parseInt(getlatestPTId.rows[0].refPTId) + 1;
     }
 
+    let latestval = lastestPTId;
+
+    await Promise.all(
+      score.map(async (element, index) => {
+        console.log(lastestPTId + index, element, multiCategoryId[index]);
+
+        await connection.query(addPatientTransactionQuery, [
+          lastestPTId + index,
+          mapId,
+          element,
+          "1",
+          refPTcreatedDate,
+          createdAt,
+          employee,
+        ]);
+
+        await connection.query(addUserScoreDetailsQuery, [
+          lastestPTId + index,
+          multiCategoryId[index],
+          createdAt,
+          employee,
+        ]);
+
+        latestval += 1;
+      })
+    );
+
+    const patientMapId = await connection.query(getDoctorPatientMapQuery, [
+      patientId,
+      doctorId,
+      hospitalId,
+    ]);
+
+    const PTcreatedDate = getDateOnly();
+
+    const createdBy = employee;
+
     await connection.query(addPatientTransactionQuery, [
-      lastestPTId,
+      latestval,
       patientMapId.rows[0].refPMId,
       "0",
       "1",
@@ -345,7 +404,7 @@ export const createReportModel = async (
     ]);
 
     await connection.query(addUserScoreDetailsQuery, [
-      lastestPTId,
+      latestval,
       "0",
       createdAt,
       createdBy,
