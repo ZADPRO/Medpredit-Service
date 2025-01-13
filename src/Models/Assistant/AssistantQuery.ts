@@ -188,7 +188,7 @@ WHERE
   AND rusd."refQCategoryId" = $2
   AND rdm."refHospitalId" = $3
   AND rdm."refDoctorId" = $4
-  AND DATE (rpt."refPTcreatedDate") = CURRENT_DATE
+  AND DATE (rpt."refPTcreatedDate") = $5
 `;
 
 export const getPasswordQuery = `
@@ -229,7 +229,7 @@ WHERE
   AND rdm."refDoctorId" = $2
   AND rdm."refHospitalId" = $3
   AND rusd."refQCategoryId" = $4
-  AND DATE (rpt."refPTcreatedDate") = CURRENT_DATE
+  AND DATE (rpt."refPTcreatedDate") = DATE ($5)
 `;
 
 export const resetScoreQuery = `
@@ -295,7 +295,7 @@ FROM
 WHERE
   rpm."refPatientId" = $1
   AND rus."refQCategoryId" = '0'
-  AND DATE(rpt."refPTcreatedDate") <= CURRENT_DATE
+  AND DATE(rpt."refPTcreatedDate") <= DATE ($2)
   ORDER BY rus."refUSDId" DESC
 `;
 
@@ -311,12 +311,12 @@ WHERE
   rdm."refHospitalId" = $1
   AND rdm."refDoctorId" = $2
   AND rpm."refPatientId" = $3
-  AND DATE(rusd."createdAt") = CURRENT_DATE;
+  AND DATE(rusd."createdAt") = DATE ($4);
 `;
 
 export const getCatgeoryQuery = `
 SELECT
-  rc."refCategoryLabel"
+  *
 FROM
   public."refCategory" rc
 WHERE
@@ -411,7 +411,8 @@ FROM
   JOIN public."refDoctorMap" rdm ON rdm."refDoctorId" = CAST(u."refUserId" AS TEXT)
   JOIN public."refHospital" rh ON rh."refHospitalId" = CAST(rdm."refHospitalId" AS INTEGER)
 WHERE
-  u."refUserId" = $1;
+  u."refUserId" = $1
+  AND rh."refHospitalId" = $2;
   `;
 
 export const getReportSessionQuery = `
@@ -437,7 +438,7 @@ FROM
 WHERE
   rpm."refPatientId" = $1
   AND rusd."refQCategoryId" = $2
-  AND DATE(rpt."refPTcreatedDate") = CURRENT_DATE;
+  AND DATE(rpt."refPTcreatedDate") = DATE ($3);
   `;
 
 export const insertTreatmentDetails = `
@@ -494,7 +495,7 @@ export const deleteTreatmentDetails = `
     AND rdm."refDMId" = CAST(rpm."refDoctorId" AS INTEGER)
     AND rpm."refPatientId" = $1
     AND rdm."refDoctorId" = $2
-    AND DATE(rtd."refTDCreatedDate") = CURRENT_DATE;
+    AND DATE(rtd."refTDCreatedDate") = DATE ($3);
   `;
 
 export const getTreatmentDetails = `

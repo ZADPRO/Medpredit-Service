@@ -167,20 +167,7 @@ export const Tabacco = (answers: any) => {
       riskpastsmoking = "High risk of past smoking";
     }
   }
-
-  console.log(q9);
-
-  console.log("1", tobacco);
-  console.log("2", smokingtobacco);
-  console.log("3", smokelesstobaccouse);
-  console.log("4", home);
-  console.log("5", workplace);
-  console.log("6", attitudetoward);
-  console.log("7", packyear);
-  console.log("8", riskpackyear);
-  console.log("9", riskpastsmoking);
-  console.log("10", highrisksmokeless);
-
+  
   return [
     tobacco,
     smokingtobacco,

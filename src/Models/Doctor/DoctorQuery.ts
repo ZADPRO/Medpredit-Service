@@ -190,7 +190,7 @@ FROM
 WHERE
   DATE(rpt."refPTcreatedDate") = $1
   AND rpm."refPatientId" = $2
-  AND rusd."refQCategoryId" IN ('103', '203', '204', '202', '207');
+  AND rusd."refQCategoryId" IN ('103', '203', '204', '202', '207','52','53','90','91');
   `;
 
 export const getDiagnosisTreatmentQuery = `
@@ -205,6 +205,14 @@ export const getDiagnosisTreatmentQuery = `
     WHERE
       DATE(rtd."refTDCreatedDate") = DATE($1)
       AND rpm."refPatientId" = $2
-      AND rtd."refTDCat" = 'Anti-diabetic'
+      AND rtd."refTDCat" = $3
   ) AS treatementDetails;
   `;
+
+  export const patientDetails = `
+  SELECT
+  *
+FROM
+  public."Users" u
+  JOIN public."refPatientMap" rpm ON rpm."refPatientId" = CAST(u."refUserId" AS TEXT)
+  WHERE rpm."refPMId" = $1`;

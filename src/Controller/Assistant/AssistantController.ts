@@ -361,7 +361,11 @@ const getUserScoreVerifyController = async (req, res) => {
 
 const getProfileController = async (req, res) => {
   try {
-    const result = await getProfileModel(req.userData.userid);
+    const { hospitalId } = req.body;
+
+    console.log(hospitalId);
+    
+    const result = await getProfileModel(req.userData.userid, hospitalId);
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
     console.error("Something went Wrong");

@@ -244,6 +244,8 @@ export const getCategoryModels = async (
 ) => {
   const connection = await DB();
 
+  const PTcreatedDate = getDateOnly();
+
   try {
     const values = [categoryId];
 
@@ -257,11 +259,14 @@ export const getCategoryModels = async (
         element.refQCategoryId,
         hospitalId,
         doctorId,
+        PTcreatedDate,
       ]);
 
       const UserScoreVerify = await connection.query(getUserScoreVerifyQuery, [
         element.refQCategoryId,
       ]);
+
+      console.log(score.rows);
 
       resultArray.push({
         refQCategoryId: element.refQCategoryId,
@@ -271,6 +276,8 @@ export const getCategoryModels = async (
         refScoreId: score.rows.length > 0 ? score.rows[0].refPTId : null,
       });
     }
+
+    console.log(resultArray);
 
     return {
       status: true,
@@ -1002,6 +1009,8 @@ export const resetScoreModel = async (
   try {
     await connection.query("BEGIN;");
 
+    const PTcreatedDate = getDateOnly();
+
     let multiCategoryId = [];
 
     console.log(refQCategoryId);
@@ -1181,7 +1190,11 @@ export const resetScoreModel = async (
       ];
     } else if (refQCategoryId === 201) {
       multiCategoryId = ["201"];
-      await connection.query(deleteTreatmentDetails, [refPatientId, doctorId]);
+      await connection.query(deleteTreatmentDetails, [
+        refPatientId,
+        doctorId,
+        PTcreatedDate,
+      ]);
     } else if (refQCategoryId === 202) {
       multiCategoryId = ["202"];
       await connection.query(resetScoreInvestigationDetails, [refQCategoryId]);
@@ -1262,6 +1275,7 @@ export const resetScoreModel = async (
           doctorId,
           refHospitalId,
           element,
+          PTcreatedDate,
         ]);
 
         await connection.query(resetScoreQuery, [refScore.rows[0].refUSDId]);
@@ -1287,8 +1301,10 @@ export const resetScoreModel = async (
 export const postPastReportModel = async (patientId: any) => {
   const connection = await DB();
 
+  const PTcreatedDate = getDateOnly();
+
   try {
-    const values = [patientId];
+    const values = [patientId, PTcreatedDate];
 
     const result = await connection.query(postPastReport, values);
 
@@ -1312,15 +1328,21 @@ export const postCurrentReportModels = async (
 ) => {
   const connection = await DB();
 
+  const PTcreatedDate = getDateOnly();
+
   try {
     const result = await connection.query(postCurrentReport, [
       hospitalId,
       doctorId,
       patientId,
+      PTcreatedDate,
     ]);
 
     let categoryId = "";
     let categoryLabel = "";
+
+    let mainId = "";
+    let mainLabel = "";
 
     let isCategoryZeroAvailable = result.rows.some(
       (row) => row.refQCategoryId === "0"
@@ -1357,6 +1379,12 @@ export const postCurrentReportModels = async (
           categoryId = element;
           const result = await connection.query(getCatgeoryQuery, [element]);
           categoryLabel = result.rows[0].refCategoryLabel;
+
+          const mainresult = await connection.query(getCatgeoryQuery, [
+            result.rows[0].refQSubCategory,
+          ]);
+          mainId = mainresult.rows[0].refQCategoryId;
+          mainLabel = mainresult.rows[0].refCategoryLabel;
           break;
         } else {
           isCategoryZeroAvailable = "report";
@@ -1369,6 +1397,8 @@ export const postCurrentReportModels = async (
       currentCatgoryStatus: isCategoryZeroAvailable,
       categoryId: categoryId,
       categoryLabel: categoryLabel,
+      mainId: mainId,
+      mainLabel: mainLabel,
     };
   } catch (error) {
     console.error("Something went Wrong", error);
@@ -1424,11 +1454,11 @@ export const getUserScoreVerifyModel = async (categoryId: any) => {
   }
 };
 
-export const getProfileModel = async (userId: any) => {
+export const getProfileModel = async (userId: any,hospitalId:any) => {
   const connection = await DB();
 
   try {
-    const result = await connection.query(getProfileQuery, [userId]);
+    const result = await connection.query(getProfileQuery, [userId, hospitalId]);
 
     return {
       status: true,
@@ -1447,11 +1477,13 @@ export const getQuestionScoreModel = async (
   categoryId: any
 ) => {
   const connection = await DB();
+  const PTcreatedDate = getDateOnly();
 
   try {
     const result = await connection.query(getQuestionScoreQuery, [
       patientId,
       categoryId,
+      PTcreatedDate,
     ]);
 
     return {

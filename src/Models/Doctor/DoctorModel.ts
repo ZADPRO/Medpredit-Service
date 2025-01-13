@@ -22,6 +22,7 @@ import {
   getScoreVerifyReport,
   getStressAnswerQuery,
 } from "./DoctorQuery";
+import { Hypertension } from "../../Helper/Formula/Diagnosis/Hypertension";
 const DB = require("../../Helper/DBConncetion");
 
 const {
@@ -320,6 +321,7 @@ export const createReportModel = async (
   try {
     const refPTcreatedDate = getDateOnly();
 
+    // Diabetics Diagnosis
     const scoreResult = await connection.query(getDiagnosisQuery, [
       refPTcreatedDate,
       patientId,
@@ -327,7 +329,7 @@ export const createReportModel = async (
 
     const treatmentDetails = await connection.query(
       getDiagnosisTreatmentQuery,
-      [refPTcreatedDate, patientId]
+      [refPTcreatedDate, patientId, "Anti-diabetic"]
     );
 
     const diabetesResult = Diabetes(
@@ -335,8 +337,27 @@ export const createReportModel = async (
       treatmentDetails.rows[0].treatementdetails
     );
 
-    let score = [diabetesResult];
-    let multiCategoryId = ["237"];
+    // Hypertension Diagnosis
+    const hypertensiontreatmentDetails = await connection.query(
+      getDiagnosisTreatmentQuery,
+      [refPTcreatedDate, patientId, "Anti-hypertensive"]
+    );
+
+    const ageQuery = await connection.query(getPatientDetail, [patientId]);
+
+    const age = calculateAge(ageQuery.rows[0].refDOB);
+
+    const hypertensionResult = Hypertension(
+      scoreResult.rows,
+      hypertensiontreatmentDetails.rows[0].treatementdetails,
+      treatmentDetails.rows[0].treatementdetails,
+      age
+    );
+
+    console.log(diabetesResult, hypertensionResult);
+
+    let score = [diabetesResult, hypertensionResult];
+    let multiCategoryId = ["237", "238"];
 
     const createdAt = CurrentTime();
 

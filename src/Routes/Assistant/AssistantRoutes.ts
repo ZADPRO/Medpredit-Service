@@ -75,7 +75,7 @@ AssistantRoutes.post(
   getUserScoreVerifyController
 );
 
-AssistantRoutes.get("/getProfile", verifyToken, getProfileController);
+AssistantRoutes.post("/getProfile", verifyToken, getProfileController);
 
 AssistantRoutes.post(
   "/getQuestionScore",
