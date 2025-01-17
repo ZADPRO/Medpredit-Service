@@ -216,3 +216,14 @@ FROM
   public."Users" u
   JOIN public."refPatientMap" rpm ON rpm."refPatientId" = CAST(u."refUserId" AS TEXT)
   WHERE rpm."refPMId" = $1`;
+
+  export const getTreatementDetails = `
+  SELECT
+  *
+FROM
+  public."refTreatmentDetails" rtd
+  JOIN public."refPatientMap" rpm ON rpm."refPMId" = CAST(rtd."refPMId" AS INTEGER)
+WHERE
+  rpm."refPatientId" = $1
+  AND DATE (rtd."refTDCreatedDate") = DATE($2)
+  `;

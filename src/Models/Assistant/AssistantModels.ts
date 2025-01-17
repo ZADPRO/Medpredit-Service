@@ -17,6 +17,7 @@ import {
   deleteTreatmentDetailQuery,
   deleteTreatmentDetails,
   getInvestigationDetailsQuery,
+  getProfileQueryAssistant,
   getQuestionScoreQuery,
   insertInvestigationDetails,
   insertTreatmentDetails,
@@ -1454,16 +1455,33 @@ export const getUserScoreVerifyModel = async (categoryId: any) => {
   }
 };
 
-export const getProfileModel = async (userId: any,hospitalId:any) => {
+export const getProfileModel = async (userId: any, hospitalId: any) => {
   const connection = await DB();
 
   try {
-    const result = await connection.query(getProfileQuery, [userId, hospitalId]);
+    const resultDoctor = await connection.query(getProfileQuery, [
+      userId,
+      hospitalId,
+    ]);
 
-    return {
-      status: true,
-      data: result.rows[0],
-    };
+    if (resultDoctor.rows[0]) {
+      return {
+        status: true,
+        data: resultDoctor.rows[0],
+      };
+    } else {
+      const resultAssistant = await connection.query(getProfileQueryAssistant, [
+        userId,
+        hospitalId,
+      ]);
+
+      if (resultAssistant.rows[0]) {
+        return {
+          status: true,
+          data: resultAssistant.rows[0],
+        };
+      }
+    }
   } catch (error) {
     console.error("Something went Wrong", error);
     throw error;

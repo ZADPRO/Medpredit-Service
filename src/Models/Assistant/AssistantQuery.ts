@@ -415,6 +415,23 @@ WHERE
   AND rh."refHospitalId" = $2;
   `;
 
+
+  export const getProfileQueryAssistant = `
+SELECT
+  u."refUserCustId",
+  u."refUserFname" || ' ' || u."refUserLname" AS "refUserName",
+  u."refRoleId",
+  rh."refHospitalName"
+FROM
+  public."Users" u
+  JOIN public."refAssMap" ram ON ram."refAssId" = CAST(u."refUserId" AS TEXT)
+  JOIN public."refDoctorMap" rdm ON rdm."refDoctorId" = CAST(ram."refDoctorId" AS TEXT)
+  JOIN public."refHospital" rh ON rh."refHospitalId" = CAST(rdm."refHospitalId" AS INTEGER)
+WHERE
+  u."refUserId" = $1
+  AND rh."refHospitalId" = $2;
+  `;
+
 export const getReportSessionQuery = `
 SELECT
   *

@@ -21,6 +21,7 @@ import {
   getScoreReport,
   getScoreVerifyReport,
   getStressAnswerQuery,
+  getTreatementDetails,
 } from "./DoctorQuery";
 import { Hypertension } from "../../Helper/Formula/Diagnosis/Hypertension";
 const DB = require("../../Helper/DBConncetion");
@@ -685,6 +686,11 @@ export const getReportPDFModel = async (patientId: any, reportDate: any) => {
 
     const categoryResult = await connection.query(getAllCategoryFamilyHistory);
 
+    const treatementDetails = await connection.query(getTreatementDetails, [
+      patientId,
+      reportDate,
+    ]);
+
     return {
       status: true,
       doctorDetails: doctorResult.rows[0],
@@ -693,6 +699,7 @@ export const getReportPDFModel = async (patientId: any, reportDate: any) => {
       scoreVerifyResult: scoreVerifyResult.rows,
       generateDate: scoreResult.rows[0].refPTcreatedDate,
       categoryResult: categoryResult.rows,
+      treatmentDetails: treatementDetails.rows,
     };
   } catch (error) {
     console.error("Something went Wrong", error);
