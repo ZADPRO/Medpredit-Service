@@ -1,17 +1,6 @@
 export const CurrentTime = (): string => {
-  const systemTime = new Date();
-
-  const options: Intl.DateTimeFormatOptions = {
-    day: "numeric",
-    month: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-    second: "numeric",
-    hour12: true,
-  };
-
-  return new Intl.DateTimeFormat("en-IN", options).format(systemTime);
+  const today = new Date();
+  return today.toISOString().replace("T", " ").slice(0, 19); // "YYYY-MM-DD HH:mm:ss"
 };
 
 export const getDateOnly = (): Date => {
@@ -23,7 +12,6 @@ export const getDateOnly = (): Date => {
   // Return a Date object representing only the date part (time will be 00:00:00)
   return new Date(year, month, day);
 };
-
 
 export const calculateAge = (dateOfBirth) => {
   const dob = new Date(dateOfBirth); // Parse the given date
@@ -74,15 +62,15 @@ export const getHoursAndMinutesBetween = (
   return { hours, minutes };
 };
 
-export const calculateDaysDifference = (date1, date2) =>{
+export const calculateDaysDifference = (date1, date2) => {
   // Parse the dates
-  const d1:any = new Date(date1);
-  const d2:any = new Date(date2);
-  
+  const d1: any = new Date(date1);
+  const d2: any = new Date(date2);
+
   // Calculate the difference in time (milliseconds)
   const diffInTime = Math.abs(d2 - d1);
-  
+
   // Convert the difference to days
   const diffInDays = Math.ceil(diffInTime / (1000 * 60 * 60 * 24));
   return diffInDays;
-}
+};

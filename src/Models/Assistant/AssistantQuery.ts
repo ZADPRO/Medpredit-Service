@@ -301,7 +301,9 @@ WHERE
 
 export const postCurrentReport = `
 SELECT
-  *
+  rusd."refUSDId",
+  rusd."refPTId",
+  rusd."refQCategoryId"
 FROM
   public."refUserScoreDetail" rusd
   JOIN public."refPatientTransaction" rpt ON rpt."refPTId" = CAST(rusd."refPTId" AS INTEGER)
