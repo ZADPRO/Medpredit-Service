@@ -84,7 +84,7 @@ FROM
   WHERE rpm."refPatientId" = $1
   AND rdm."refDoctorId" = $2
   AND rdm."refHospitalId" = $3
-  AND DATE (rpt."refPTcreatedDate") = $4
+  AND DATE (rpt."refPTcreatedDate") = DATE($4)
   `;
 
 export const getAllScoreVerifyQuery = `
@@ -209,7 +209,7 @@ export const getDiagnosisTreatmentQuery = `
   ) AS treatementDetails;
   `;
 
-  export const patientDetails = `
+export const patientDetails = `
   SELECT
   *
 FROM
@@ -217,7 +217,7 @@ FROM
   JOIN public."refPatientMap" rpm ON rpm."refPatientId" = CAST(u."refUserId" AS TEXT)
   WHERE rpm."refPMId" = $1`;
 
-  export const getTreatementDetails = `
+export const getTreatementDetails = `
   SELECT
   *
 FROM
