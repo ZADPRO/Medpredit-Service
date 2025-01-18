@@ -124,6 +124,7 @@ export const getCurrentReportDataModel = async (
     const getAllScoreResult = await connection.query(getAllScoreQuery, [
       patientId,
       doctorId,
+      refPTcreatedDate,
     ]);
 
     const getAllScoreVerify = await connection.query(getAllScoreVerifyQuery);

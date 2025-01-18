@@ -70,7 +70,7 @@ FROM
   JOIN public."refDoctorMap" rdm ON rdm."refDMId" = CAST(rpm."refDoctorId" AS INTEGER)
   WHERE rpm."refPatientId" = $1
   AND rdm."refDoctorId" = $2
-  AND DATE (rpt."refPTcreatedDate") = CURRENT_DATE
+  AND DATE (rpt."refPTcreatedDate") = DATE($3)
   `;
 
 export const getParticualarScoreQuery = `

@@ -527,7 +527,7 @@ FROM
 WHERE
   rpm."refPatientId" = $1
   AND rdm."refDoctorId" = $2
-  AND DATE (rtd."refTDCreatedDate") = $3
+  AND DATE (rtd."refTDCreatedDate") = DATE($3)
   `;
 
 export const insertInvestigationDetails = `
@@ -605,7 +605,7 @@ FROM (
   WHERE
     rivd."refUserId" = $1 
     AND rivd."refQCategoryId" = $2
-    AND rivd."refIVDDate"::date <= TO_DATE($3, 'DD/MM/YYYY')
+    AND rivd."refIVDDate"::date <= DATE($3)
   ORDER BY
     rivd."refIVDDate" DESC
   LIMIT

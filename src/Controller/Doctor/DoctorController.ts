@@ -140,7 +140,7 @@ const getCurrentReportDataController = async (req, res) => {
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
     console.error("Something went Wrong");
-    return res.status(500).json({ error: "Something went Wrong" });
+    return res.status(500).json({ error: "Something went Wrong"+error });
   }
 };
 
@@ -190,7 +190,7 @@ const getPastReportDataController = async (req, res) => {
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
     console.error("Something went Wrong");
-    return res.status(500).json({ error: "Something went Wrong" });
+    return res.status(500).json({ error: "Something went Wrong"+error });
   }
 };
 
