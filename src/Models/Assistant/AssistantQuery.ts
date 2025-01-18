@@ -293,9 +293,9 @@ FROM
   JOIN public."refPatientMap" rpm ON rpm."refPMId" = CAST(rpt."refPMId" AS INTEGER)
   JOIN public."refDoctorMap" rdm ON rdm."refDMId" = CAST(rpm."refDoctorId" AS INTEGER)
 WHERE
-  rpm."refPatientId" = '4'
+  rpm."refPatientId" = $1
   AND rus."refQCategoryId" = '0'
-  AND DATE(rpt."refPTcreatedDate") <= DATE ('2025-01-18T18:30:00.000Z')
+  AND DATE(rpt."refPTcreatedDate") <= DATE ($2)
   ORDER BY rus."refUSDId" DESC
 `;
 
