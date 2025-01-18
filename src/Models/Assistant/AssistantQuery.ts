@@ -260,7 +260,7 @@ SELECT
     FROM
       public."Users" u
     WHERE
-      u."refUserId" = CAST(rpm."refDoctorId" AS INTEGER)
+      u."refUserId" = CAST(rdm."refDoctorId" AS INTEGER)
   ) AS doctorName,
   rdm."refHospitalId",
   (
