@@ -16,6 +16,10 @@ export const usersigninModel = async (username: string, password: string) => {
   const connection = await DB();
 
   try {
+
+    console.log('====================================');
+    console.log("HEllo");
+    console.log('====================================');
     const values = [username];
 
     const result = await connection.query(usersigninQuery, values);
