@@ -14,14 +14,16 @@ export const CurrentTime = (): string => {
   return new Intl.DateTimeFormat("en-IN", options).format(systemTime);
 };
 
-export const getDateOnly = (): string => {
+export const getDateOnly = (): Date => {
   const today = new Date();
-  const day = String(today.getDate()).padStart(2, "0"); // Ensures two digits
-  const month = String(today.getMonth() + 1).padStart(2, "0"); // Months are 0-based
+  const day = today.getDate(); // No need to pad, since Date constructor handles raw numbers
+  const month = today.getMonth(); // Months are already 0-based
   const year = today.getFullYear();
 
-  return `${day}/${month}/${year}`;
+  // Return a Date object representing only the date part (time will be 00:00:00)
+  return new Date(year, month, day);
 };
+
 
 export const calculateAge = (dateOfBirth) => {
   const dob = new Date(dateOfBirth); // Parse the given date
