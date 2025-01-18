@@ -209,10 +209,10 @@ export const getSubMainCategoryModels = async (
         getReportSession.rows[0].refPTcreatedDate;
 
       function parseDateOnly(dateStr: string): Date {
-        const [day, month, year] = dateStr.split("/").map(Number);
-        return new Date(year, month - 1, day); // Create Date object with date only
+        // Parse ISO 8601 string directly as a Date object
+        const date = new Date(dateStr);
+        return new Date(date.setHours(0, 0, 0, 0)); // Set the time to midnight for date-only comparison
       }
-
       // Parse the dates
       const today: Date = parseDateOnly(todayDate);
       const createdDate: Date = parseDateOnly(refPTcreatedDate);

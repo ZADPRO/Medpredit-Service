@@ -252,7 +252,7 @@ SELECT
   rpm."refPatientId",
   rus."refQCategoryId",
   rpt."refPTScore",
-  TO_CHAR(CAST(rus."createdAt" AS TIMESTAMP), 'DD-MM-YYYY') AS "createdAt",
+  rus."createdAt" AS "createdAt",
   rpm."refDoctorId",
   (
     SELECT
@@ -293,9 +293,9 @@ FROM
   JOIN public."refPatientMap" rpm ON rpm."refPMId" = CAST(rpt."refPMId" AS INTEGER)
   JOIN public."refDoctorMap" rdm ON rdm."refDMId" = CAST(rpm."refDoctorId" AS INTEGER)
 WHERE
-  rpm."refPatientId" = $1
+  rpm."refPatientId" = '4'
   AND rus."refQCategoryId" = '0'
-  AND DATE(rpt."refPTcreatedDate") <= DATE ($2)
+  AND DATE(rpt."refPTcreatedDate") <= DATE ('2025-01-18T18:30:00.000Z')
   ORDER BY rus."refUSDId" DESC
 `;
 
