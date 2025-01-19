@@ -530,6 +530,18 @@ WHERE
   AND DATE (rtd."refTDCreatedDate") = DATE($3)
   `;
 
+  export const getReportTreatmentDetails = `
+  SELECT
+  *
+FROM
+  public."refTreatmentDetails" rtd
+  JOIN public."refPatientMap" rpm ON rpm."refPMId" = CAST(rtd."refPMId" AS INTEGER)
+  JOIN public."refDoctorMap" rdm ON rdm."refDMId" = CAST(rpm."refDoctorId" AS INTEGER)
+WHERE
+  rpm."refPatientId" = $1
+  AND DATE (rtd."refTDCreatedDate") = DATE($2)
+  `;
+
 export const insertInvestigationDetails = `
   insert into
   "public"."refInvestigationDetails" (

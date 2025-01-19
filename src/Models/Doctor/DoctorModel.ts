@@ -6,6 +6,7 @@ import {
   addUserScoreDetailsQuery,
   getCurrentInvestigation,
   getLatestPTIdQuery,
+  getReportTreatmentDetails,
   getTreatmentDetails,
 } from "../Assistant/AssistantQuery";
 import {
@@ -470,19 +471,14 @@ export const getPastReportDataModel = async (
       getAllScoreResult.rows[0].refPMId,
     ]);
 
-    console.log("====================================");
-    console.log(getAllScoreResult.rows[0].refPMId);
-    console.log("====================================");
-
     const doctor = doctorIdResult.rows[0];
 
     const getAllScoreVerify = await connection.query(getAllScoreVerifyQuery);
 
     const getStressAnswer = await connection.query(getStressAnswerQuery);
 
-    const TreatmentDetails = await connection.query(getTreatmentDetails, [
+    const TreatmentDetails = await connection.query(getReportTreatmentDetails, [
       patientId,
-      doctorId,
       reportDate,
     ]);
 
