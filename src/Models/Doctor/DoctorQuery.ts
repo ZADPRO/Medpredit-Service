@@ -43,6 +43,22 @@ WHERE
   AND rdm."refDoctorId" = $2
   `;
 
+export const getDoctorData = `
+SELECT
+  u."refUserFname" || ' ' || u."refUserLname" AS doctorName,
+  u."refUserCustId" AS doctorId,
+  rh."refHospitalName" AS hospital,
+  rh."refHospitalAddress" AS hospitalAddress,
+  rh."refHospitalPincode" AS hospitalPincode
+FROM
+  public."refPatientMap" rpm
+  JOIN public."refDoctorMap" rdm ON rdm."refDMId" = CAST(rpm."refDoctorId" AS INTEGER)
+  JOIN public."refHospital" rh ON rh."refHospitalId" = CAST(rdm."refHospitalId" AS INTEGER)
+  JOIN public."Users" u ON u."refUserId" = CAST(rdm."refDoctorId" AS INTEGER)
+WHERE
+  rpm."refPMId" = $1
+  `;
+
 export const getPatientDetail = `
 SELECT
   *
@@ -82,9 +98,7 @@ FROM
   JOIN public."refPatientMap" rpm ON rpm."refPMId" = CAST(rpt."refPMId" AS INTEGER)
   JOIN public."refDoctorMap" rdm ON rdm."refDMId" = CAST(rpm."refDoctorId" AS INTEGER)
   WHERE rpm."refPatientId" = $1
-  AND rdm."refDoctorId" = $2
-  AND rdm."refHospitalId" = $3
-  AND DATE (rpt."refPTcreatedDate") = DATE($4)
+  AND DATE (rpt."refPTcreatedDate") = DATE($2)
   `;
 
 export const getAllScoreVerifyQuery = `

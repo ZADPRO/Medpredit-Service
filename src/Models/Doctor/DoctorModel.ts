@@ -15,6 +15,7 @@ import {
   getAllScoreVerifyQuery,
   getDiagnosisQuery,
   getDiagnosisTreatmentQuery,
+  getDoctorData,
   getDoctorDetailsReport,
   getParticualarScoreQuery,
   getPatientDetailsReport,
@@ -452,28 +453,28 @@ export const getPastReportDataModel = async (
 ) => {
   const connection = await DB();
   try {
-    const doctorIdResult = await connection.query(getDoctorMap, [
-      hospitalId,
-      doctorId,
-    ]);
-
     const patientIdResult = await connection.query(getPatientDetail, [
       patientId,
     ]);
-
-    const doctor = doctorIdResult.rows[0];
 
     const patient = patientIdResult.rows[0];
 
     const getAllCategoryResult = await connection.query(getAllCategoryQuery);
 
-    console.log(patientId, doctorId, hospitalId, reportDate);
     const getAllScoreResult = await connection.query(getParticualarScoreQuery, [
       patientId,
-      doctorId,
-      hospitalId,
       reportDate,
     ]);
+
+    const doctorIdResult = await connection.query(getDoctorData, [
+      getAllScoreResult.rows[0].refPMId,
+    ]);
+
+    console.log("====================================");
+    console.log(getAllScoreResult.rows[0].refPMId);
+    console.log("====================================");
+
+    const doctor = doctorIdResult.rows[0];
 
     const getAllScoreVerify = await connection.query(getAllScoreVerifyQuery);
 
@@ -614,11 +615,10 @@ export const getPastReportDataModel = async (
 
     return {
       doctorDetail: {
-        doctorName: doctor.refUserFname + " " + doctor.refUserLname,
-        doctorId: doctor.refUserCustId,
-        hospital: doctor.refHospitalName,
-        hospitalAddress:
-          doctor.refHospitalAddress + ", " + doctor.refHospitalPincode,
+        doctorName: doctor.doctorname,
+        doctorId: doctor.doctorid,
+        hospital: doctor.hospital,
+        hospitalAddress: doctor.hospitaladdress + ", " + doctor.hospitalpincode,
       },
       patientDetail: {
         patientName: patient.refUserFname + " " + patient.refUserLname,

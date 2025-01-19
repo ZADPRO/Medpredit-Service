@@ -6,11 +6,6 @@
     "auditLog": "D:\\Projects\\MedPredit\\Medpredit-Backend\\Logs\\.5a15cbd5b5349d17f195673b1d1a3ab47627ed9b-audit.json",
     "files": [
         {
-            "date": 1736660333811,
-            "name": "D:\\Projects\\MedPredit\\Medpredit-Backend\\Logs\\2025-01-12.log",
-            "hash": "f4bc68082180fe19c80821af4a1a82e58142427740e5e67063d0c6b0b501c93a"
-        },
-        {
             "date": 1736740962013,
             "name": "D:\\Projects\\MedPredit\\Medpredit-Backend\\Logs\\2025-01-13.log",
             "hash": "31de7543563baf35e366546039c1d63ae06e570b2d6ff855e0691d9c8c29c674"
@@ -34,6 +29,11 @@
             "date": 1737166550478,
             "name": "D:\\Projects\\MedPredit\\Medpredit-Backend\\Logs\\2025-01-18.log",
             "hash": "1287b00e27f398d66e573f0b0b15244e5a24d74f17ac7625021e43cdb473a476"
+        },
+        {
+            "date": 1737274200944,
+            "name": "D:\\Projects\\MedPredit\\Medpredit-Backend\\Logs\\2025-01-19.log",
+            "hash": "9cb98a88baef43579562f549853076cc2a5a8a82e72b1362227414c292ec5f5e"
         }
     ],
     "hashType": "sha256"
