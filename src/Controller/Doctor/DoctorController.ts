@@ -8,7 +8,8 @@ import {
   getCurrentReportDataModel,
   createReportModel,
   getPastReportDataModel,
-  getReportPDFModel,
+  getCurrentReportPDFModel,
+  getPastReportPDFModel,
 } from "../../Models/Doctor/DoctorModel";
 
 const addEmployeeController = async (req, res) => {
@@ -140,7 +141,7 @@ const getCurrentReportDataController = async (req, res) => {
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
     console.error("Something went Wrong");
-    return res.status(500).json({ error: "Something went Wrong"+error });
+    return res.status(500).json({ error: "Something went Wrong" + error });
   }
 };
 
@@ -170,9 +171,7 @@ const createReportController = async (req, res) => {
 
 const getPastReportDataController = async (req, res) => {
   try {
-    const { patientId, employeeId, hospitalId, reportDate } = req.body;
-
-    console.log(reportDate);
+    const { patientId, employeeId, reportDate } = req.body;
 
     let doctorId = employeeId;
 
@@ -180,29 +179,50 @@ const getPastReportDataController = async (req, res) => {
       doctorId = req.userData.userid;
     }
 
+    console.log(patientId, doctorId, reportDate);
+
     const result = await getPastReportDataModel(
       patientId,
       doctorId,
-      hospitalId,
       reportDate
     );
 
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
     console.error("Something went Wrong");
-    return res.status(500).json({ error: "Something went Wrong"+error });
+    return res.status(500).json({ error: "Something went Wrong" + error });
   }
 };
 
+
 const getReportPDFController = async (req, res) => {
   try {
-    const { patientId, reportDate } = req.body;
+    const { patientId, roleType, reportDate } = req.body;
 
-    console.log(patientId, reportDate);
+    let doctorId = "0";
 
-    const result = await getReportPDFModel(patientId, reportDate);
+    if (roleType === "4" || "1") {
+      doctorId = req.userData.userid;
+    }
+
+    // if (type === "currentReport") {
+    const result = await getCurrentReportPDFModel(
+      patientId,
+      reportDate,
+      doctorId
+    );
 
     return res.status(200).json(encrypt(result, true));
+    // } else if (type === "pastReport") {
+    //   const result = await getPastReportPDFModel(
+    //     patientId,
+    //     refPMId,
+    //     fromDate,
+    //     toDate
+    //   );
+
+    //   return res.status(200).json(encrypt(result, true));
+    // }
   } catch (error) {
     console.error("Something went Wrong");
     return res.status(500).json({ error: "Something went Wrong" });

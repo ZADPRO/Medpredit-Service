@@ -14,13 +14,18 @@ import { Stress } from "../../Helper/Formula/Stress";
 import { Tabacco } from "../../Helper/Formula/Tobacco";
 import { Vitals } from "../../Helper/Formula/Vitals";
 import {
+  addPatientIdTransactionQuery,
+  checkMobileNumberQuery,
   deleteTreatmentDetailQuery,
   deleteTreatmentDetails,
   getInvestigationDetailsQuery,
   getProfileQueryAssistant,
+  getProfileQueryUsers,
   getQuestionScoreQuery,
   insertInvestigationDetails,
   insertTreatmentDetails,
+  overAllId,
+  postReportParticularDate,
   resetScoreInvestigationDetails,
 } from "./AssistantQuery";
 import { SingleSelectValues } from "../../Helper/Formula/Investigation/SingleSelectValue";
@@ -88,59 +93,75 @@ export const postNewPatientModels = async (values: any) => {
 
     await connection.query("BEGIN;");
 
-    const patientId =
-      100000 +
-      parseInt(
-        nextUserIdData.rows[0].nextrefusercustid
-          ? nextUserIdData.rows[0].nextrefusercustid
-          : 1
-      );
-
-    const newUservaluesInsert = [
-      "MED" + patientId,
-      "3",
-      values.refUserFname,
-      values.refUserLname,
-      values.refDOB,
-      values.refGender,
-      values.refMaritalStatus,
-      values.refEducation,
-      values.refProfession,
-      values.refSector,
-      values.createdAt,
-      values.createdBy,
-    ];
-
-    await connection.query(postNewUser, newUservaluesInsert);
-
-    const getuseridVal = await connection.query(getUserId, ["MED" + patientId]);
-
-    const newrefCommunicationValue = [
-      getuseridVal.rows[0].refUserId,
+    const checkMobileNumber = await connection.query(checkMobileNumberQuery, [
       values.refUserMobileno,
-      values.refUserEmail,
-      values.refAddress,
-      values.refDistrict,
-      values.refPincode,
-      values.createdAt,
-      values.createdBy,
-    ];
+    ]);
 
-    await connection.query(postnewCommunication, newrefCommunicationValue);
+    if (checkMobileNumber.rows.length < 1) {
+      const patientId =
+        100000 +
+        parseInt(
+          nextUserIdData.rows[0].nextrefusercustid
+            ? nextUserIdData.rows[0].nextrefusercustid
+            : 1
+        );
 
-    const newUserDomainValue = [
-      getuseridVal.rows[0].refUserId,
-      values.refUserPassword,
-      values.hashedPassword,
-      values.createdAt,
-      values.createdBy,
-    ];
+      const getOverallId = await connection.query(overAllId);
 
-    await connection.query(postnewUserDomain, newUserDomainValue);
+      const newUservaluesInsert = [
+        getOverallId.rows[0].overAllId,
+        "MED" + patientId,
+        "3",
+        values.refUserFname,
+        values.refUserLname,
+        values.refDOB,
+        values.refGender,
+        values.refMaritalStatus,
+        values.refEducation,
+        values.refProfession,
+        values.refSector,
+        "active",
+        values.createdAt,
+        values.createdBy,
+      ];
 
-    return {
-      status: true,
-    };
+      await connection.query(postNewUser, newUservaluesInsert);
+
+      const getuseridVal = await connection.query(getUserId, [
+        "MED" + patientId,
+      ]);
+
+      const newrefCommunicationValue = [
+        getOverallId.rows[0].overAllId,
+        values.refUserMobileno,
+        values.refUserEmail,
+        values.refAddress,
+        values.refDistrict,
+        values.refPincode,
+        values.createdAt,
+        values.createdBy,
+      ];
+
+      await connection.query(postnewCommunication, newrefCommunicationValue);
+
+      const newUserDomainValue = [
+        getOverallId.rows[0].overAllId,
+        values.refUserPassword,
+        values.hashedPassword,
+        values.createdAt,
+        values.createdBy,
+      ];
+
+      await connection.query(postnewUserDomain, newUserDomainValue);
+
+      return {
+        status: true,
+      };
+    } else {
+      return {
+        status: false,
+      };
+    }
   } catch (error) {
     await connection.query("ROLLBACK;");
     console.error("Something went Wrong", error);
@@ -157,6 +178,8 @@ export const getMainCategoryModels = async (
   hospitalId: any
 ) => {
   const connection = await DB();
+
+  console.log(doctorId);
 
   try {
     const checkPatient = await connection.query(checkPatientMapQuery, [
@@ -196,38 +219,60 @@ export const getSubMainCategoryModels = async (
 
     const result = await connection.query(getSubMainCategoryQuery, values);
 
-    const getReportSession = await connection.query(getReportSessionQuery, [
-      patientId,
-    ]);
+    let resultArray = [];
 
-    let latestreportDate = null;
+    for (const element of result.rows) {
+      console.log(element);
 
-    if (getReportSession.rows.length > 0) {
-      const todayDate = getDateOnly();
+      if (element.refQCategoryId === 94 || element.refQCategoryId === 6) {
+        console.log("+++++++++");
 
-      const refPTcreatedDate: string =
-        getReportSession.rows[0].refPTcreatedDate;
+        const score = await connection.query(getUserScore, [
+          patientId,
+          element.refQCategoryId,
+        ]);
 
-      function parseDateOnly(dateStr: string): Date {
-        // Parse ISO 8601 string directly as a Date object
-        const date = new Date(dateStr);
-        return new Date(date.setHours(0, 0, 0, 0)); // Set the time to midnight for date-only comparison
+        if (score.rows.length > 0) {
+          resultArray.push({
+            refQCategoryId: score.rows[0].refQCategoryId,
+            refPTcreatedDate: score.rows[0].refPTcreatedDate,
+          });
+        }
       }
-      // Parse the dates
-      const today: Date = parseDateOnly(todayDate);
-      const createdDate: Date = parseDateOnly(refPTcreatedDate);
-
-      const diffInMilliseconds: number =
-        today.getTime() - createdDate.getTime(); // Use getTime() to get the timestamp
-      const diffInDays: number = diffInMilliseconds / (1000 * 60 * 60 * 24); // Convert to days
-
-      latestreportDate = Math.abs(diffInDays);
     }
+
+    // const getReportSession = await connection.query(getReportSessionQuery, [
+    //   patientId,
+    // ]);
+
+    // let latestreportDate = null;
+
+    // if (getReportSession.rows.length > 0) {
+    //   const todayDate = getDateOnly();
+
+    //   const refPTcreatedDate: string =
+    //     getReportSession.rows[0].refPTcreatedDate;
+
+    //   function parseDateOnly(dateStr: string): Date {
+    //     // Parse ISO 8601 string directly as a Date object
+    //     const date = new Date(dateStr);
+    //     return new Date(date.setHours(0, 0, 0, 0)); // Set the time to midnight for date-only comparison
+    //   }
+    //   // Parse the dates
+    //   const today: Date = parseDateOnly(todayDate);
+    //   const createdDate: Date = parseDateOnly(refPTcreatedDate);
+
+    //   const diffInMilliseconds: number =
+    //     today.getTime() - createdDate.getTime(); // Use getTime() to get the timestamp
+    //   const diffInDays: number = diffInMilliseconds / (1000 * 60 * 60 * 24); // Convert to days
+
+    //   latestreportDate = Math.abs(diffInDays);
+    // }
 
     return {
       status: true,
       data: result.rows,
-      latestreportDate: latestreportDate,
+      reportAnswer: resultArray,
     };
   } catch (error) {
     console.error("Something went Wrong", error);
@@ -245,7 +290,7 @@ export const getCategoryModels = async (
 ) => {
   const connection = await DB();
 
-  const PTcreatedDate = getDateOnly();
+  // const PTcreatedDate = getDateOnly();
 
   try {
     const values = [categoryId];
@@ -258,16 +303,14 @@ export const getCategoryModels = async (
       const score = await connection.query(getUserScore, [
         patientId,
         element.refQCategoryId,
-        hospitalId,
-        doctorId,
-        PTcreatedDate,
+        // hospitalId,
+        // doctorId,
       ]);
+      // PTcreatedDate,
 
       const UserScoreVerify = await connection.query(getUserScoreVerifyQuery, [
         element.refQCategoryId,
       ]);
-
-      console.log(score.rows);
 
       resultArray.push({
         refQCategoryId: element.refQCategoryId,
@@ -275,10 +318,10 @@ export const getCategoryModels = async (
         refCategoryLabel: element.refCategoryLabel,
         refScore: score.rows.length > 0 ? score.rows[0].refPTScore : null,
         refScoreId: score.rows.length > 0 ? score.rows[0].refPTId : null,
+        refPTcreatedDate:
+          score.rows.length > 0 ? score.rows[0].refPTcreatedDate : null,
       });
     }
-
-    console.log(resultArray);
 
     return {
       status: true,
@@ -396,9 +439,10 @@ export const postAnswersModels = async (
       hospitalId,
     ]);
 
-    const mapId = map.rows[0].refPMId;
+    // console.log("+++++++++++++++++", map.rows[0].refPMId);
+    const mapId = hospitalId ? map.rows[0].refPMId : patientId;
 
-    console.log("---------->", categoryId);
+    // console.log("---------->", patientId);
 
     let score = [];
     let multiCategoryId = [];
@@ -864,15 +908,27 @@ export const postAnswersModels = async (
       score.map(async (element, index) => {
         console.log(lastestPTId + index, element, multiCategoryId[index]);
 
-        await connection.query(addPatientTransactionQuery, [
-          lastestPTId + index,
-          mapId,
-          element,
-          "1",
-          PTcreatedDate,
-          createdAt,
-          createdBy,
-        ]);
+        if (hospitalId) {
+          await connection.query(addPatientTransactionQuery, [
+            lastestPTId + index,
+            mapId,
+            element,
+            "1",
+            PTcreatedDate,
+            createdAt,
+            createdBy,
+          ]);
+        } else {
+          await connection.query(addPatientIdTransactionQuery, [
+            lastestPTId + index,
+            patientId,
+            element,
+            "1",
+            PTcreatedDate,
+            createdAt,
+            createdBy,
+          ]);
+        }
 
         await connection.query(addUserScoreDetailsQuery, [
           lastestPTId + index,
@@ -920,7 +976,10 @@ export const postFamilyUserModel = async (values: any) => {
           : 1
       );
 
+    const getOverallId = await connection.query(overAllId);
+
     const newUservaluesInsert = [
+      getOverallId.rows[0].overAllId,
       "MED" + patientId,
       "3",
       values.refUserFname,
@@ -931,16 +990,17 @@ export const postFamilyUserModel = async (values: any) => {
       values.refEducation,
       values.refProfession,
       values.refSector,
+      "active",
       createdAt,
       values.doctorId,
     ];
 
     await connection.query(postNewUser, newUservaluesInsert);
 
-    const getuseridVal = await connection.query(getUserId, ["MED" + patientId]);
+    // const getuseridVal = await connection.query(getUserId, ["MED" + patientId]);
 
     const newrefCommunicationValue = [
-      getuseridVal.rows[0].refUserId,
+      getOverallId.rows[0].overAllId,
       values.refUserMobileno,
       values.refUserEmail,
       values.refAddress,
@@ -953,7 +1013,7 @@ export const postFamilyUserModel = async (values: any) => {
     await connection.query(postnewCommunication, newrefCommunicationValue);
 
     const newUserDomainValue = [
-      getuseridVal.rows[0].refUserId,
+      getOverallId.rows[0].overAllId,
       password,
       hashedPassword,
       createdAt,
@@ -981,6 +1041,10 @@ export const getAssistantDoctorModel = async (
 ) => {
   const connection = await DB();
   try {
+    console.log("====================================");
+    console.log(assistantId);
+    console.log("====================================");
+
     const result = await connection.query(getAssistantDoctorQuery, [
       assistantId,
       hospitalId,
@@ -1305,13 +1369,63 @@ export const postPastReportModel = async (patientId: any) => {
   const PTcreatedDate = getDateOnly();
 
   try {
-    const values = [patientId, PTcreatedDate];
+    const values = [patientId];
 
     const result = await connection.query(postPastReport, values);
 
+    let finalResult = [];
+
+    for (const element of result.rows) {
+      try {
+        console.log(element);
+
+        // Await the query to ensure it completes before moving on
+        const particularDate = await connection.query(
+          postReportParticularDate,
+          [
+            element.refptcreateddate.split("-")[0],
+            element.refptcreateddate.split("-")[1],
+            patientId,
+          ]
+        );
+
+        // const partDate = [];
+
+        // let refPMID;
+
+        // if (particularDate.rows.length > 0) {
+        //   let checkval = particularDate.rows[0].refQCategoryId;
+
+        //   refPMID = particularDate.rows[0].refPMId;
+
+        //   particularDate.rows.map((particular) => {
+        //     console.log(particular);
+
+        //     if (particular.refQCategoryId === checkval)
+        //       partDate.push(particular.refptcreateddate);
+        //   });
+        // }
+
+        // partDate.sort((a, b) => Number(a) - Number(b));
+
+        finalResult.push({
+          refptcreateddate: element.refptcreateddate,
+          multipleDate: particularDate.rows,
+          refPMId: particularDate.rows[0].refPMID,
+        });
+      } catch (error) {
+        console.error("Error executing query:", error);
+      }
+    }
+
+    // console.log("##############");
+
+    // console.log(refPMID);
+    // console.log("##############");
+
     return {
       status: true,
-      data: result.rows,
+      data: finalResult,
     };
   } catch (error) {
     console.error("Something went Wrong", error);
@@ -1455,31 +1569,54 @@ export const getUserScoreVerifyModel = async (categoryId: any) => {
   }
 };
 
-export const getProfileModel = async (userId: any, hospitalId: any) => {
+export const getProfileModel = async (
+  userId: any,
+  hospitalId: any,
+  roleId: any
+) => {
   const connection = await DB();
 
-  try {
-    const resultDoctor = await connection.query(getProfileQuery, [
-      userId,
-      hospitalId,
-    ]);
+  console.log("-->--", userId, roleId);
 
-    if (resultDoctor.rows[0]) {
+  try {
+    if (roleId === 3) {
+      console.log("Hello");
+
+      const getProfileUser = await connection.query(getProfileQueryUsers, [
+        userId,
+      ]);
+
       return {
         status: true,
-        data: resultDoctor.rows[0],
+        data: getProfileUser.rows[0],
       };
+
+      // const resultPatient = await connection
     } else {
-      const resultAssistant = await connection.query(getProfileQueryAssistant, [
+      const resultDoctor = await connection.query(getProfileQuery, [
         userId,
         hospitalId,
       ]);
 
-      if (resultAssistant.rows[0]) {
+      if (resultDoctor.rows[0]) {
         return {
           status: true,
-          data: resultAssistant.rows[0],
+          data: resultDoctor.rows[0],
         };
+      } else {
+        const resultAssistant = await connection.query(
+          getProfileQueryAssistant,
+          [userId, hospitalId]
+        );
+
+        console.log(resultAssistant.rows);
+
+        if (resultAssistant.rows[0]) {
+          return {
+            status: true,
+            data: resultAssistant.rows[0],
+          };
+        }
       }
     }
   } catch (error) {
