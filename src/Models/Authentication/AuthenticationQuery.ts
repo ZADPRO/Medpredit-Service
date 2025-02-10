@@ -6,6 +6,19 @@ JOIN public."refUserDomain" rud
 ON rc."refUserId" = rud."refUserId"
 WHERE rc."refUserMobileno" = $1`;
 
+
+export const userParticularSiginQuery = `
+SELECT
+  *
+FROM
+  public."refCommunication" rc
+  JOIN public."Users" u ON rc."refUserId" = u."refUserId"
+  JOIN public."refUserDomain" rud ON rc."refUserId" = rud."refUserId"
+WHERE
+  rc."refUserMobileno" = $1
+  AND u."refUserId" = $2
+`;
+
 export const patientDataCheckQuery = `SELECT
   COUNT(*) > 0 AS result
 FROM
@@ -129,12 +142,23 @@ WHERE
 export const changePasswordQuery = `
 SELECT
   u."refUserId",
-  rud."refUserPassword"
+  rud."refUserPassword",
+  rc."refUserMobileno"
 FROM
   public."Users" u
   JOIN public."refUserDomain" rud ON rud."refUserId" = u."refUserId"
+  JOIN public."refCommunication" rc ON rc."refUserId" = u."refUserId"
 WHERE
   u."refUserId" = $1 AND rud."refUserPassword" = $2;
+`;
+
+export const getUsersListMobileNo = `
+SELECT
+  *
+FROM
+  public."refCommunication" rc
+WHERE
+  rc."refUserMobileno" = $1;
 `;
 
 export const updatePasswordQuery = `
@@ -145,4 +169,230 @@ SET
   "refUserHashedpass" = $2
 WHERE
   "refUserId" = $3;
+`;
+
+
+export const getDoctorList = `
+SELECT DISTINCT
+  ON (u."refUserId") rdm."refDMId" AS "code",
+  u."refUserCustId",
+  (
+    'Dr. ' || u."refUserFname" || ' ' || u."refUserLname"
+  ) AS "name",
+  u."activeStatus",
+  u."refUserId" AS "Id"
+FROM
+  public."Users" u
+  JOIN public."refDoctorMap" rdm ON rdm."refDoctorId" = CAST(u."refUserId" AS TEXT)
+WHERE
+  u."refRoleId" IN ('1', '4')
+  AND rdm."refHospitalId" = $1
+`;
+
+export const getAssistantList = `
+SELECT DISTINCT ON (ram."refAssId")
+  u."refUserId" AS "code",
+  (u."refUserFname" || ' ' || u."refUserLname") AS "name",
+  u."refUserCustId"
+FROM
+  public."Users" u
+  JOIN public."refAssMap" ram ON ram."refAssId" = CAST(u."refUserId" AS TEXT)
+  JOIN public."refDoctorMap" rdm ON rdm."refDMId" = CAST(ram."refDoctorId" AS INTEGER)
+WHERE
+  u."refRoleId" = $1
+  AND rdm."refHospitalId" = $2
+ORDER BY ram."refAssId";
+`;
+
+
+export const nextDoctorId = `
+SELECT 
+  COUNT(*) + 1 AS NextrefUserCustId
+FROM 
+  public."Users" us
+WHERE 
+  us."refRoleId" IN ('1', '4');
+`;
+
+
+export const nextStaffId = `
+SELECT 
+  COUNT(*) + 1 AS NextrefUserCustId
+FROM 
+  public."Users" us
+WHERE 
+  us."refRoleId" = $1;`;
+
+export const addStaffUserQuery = `
+INSERT INTO 
+  public."Users" (
+    "createdAt",
+    "createdBy",
+    "refDOB",
+    "refGender",
+    "refMaritalStatus",
+    "refRoleId",
+    "refUserCustId",
+    "refUserFname",
+    "refUserLname",
+    "activeStatus",
+    "refUserId"
+  ) 
+VALUES 
+  ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);
+
+`;
+
+export const addStaffCommunicationQuery = `
+INSERT INTO 
+  public."refCommunication" (
+    "createdAt",
+    "createdBy",
+    "refAddress",
+    "refDistrict",
+    "refPincode",
+    "refUserEmail",
+    "refUserId",
+    "refUserMobileno"
+  ) 
+VALUES 
+  ($1, $2, $3, $4, $5, $6, $7, $8);
+`;
+
+export const addStaffDomainQuery = `
+INSERT INTO 
+  public."refStaffDomain" (
+    "refUserId",
+    "refAllopathic",
+    "refEducation",
+    "refEducationSpec",
+    "refSuperSpec",
+    "refBranchSuperSpec",
+    "refAddDeg",
+    "refTypeAddDeg",
+    "refSpecBranch",
+    "refNameRegCouncil",
+    "refMCINo",
+    "refCROcpSector",
+    "refCRInstituteType",
+    "refCRInstituteName",
+    "refCRDesignation",
+    "refCRDepartment",
+    "refCRAddress",
+    "createdAt",
+    "createdBy"
+  ) 
+VALUES 
+  (
+    $1,
+    $2,
+    $3,
+    $4,
+    $5,
+    $6,
+    $7,
+    $8,
+    $9,
+    $10,
+    $11,
+    $12,
+    $13,
+    $14,
+    $15,
+    $16,
+    $17,
+    $18,
+    $19
+  );
+`;
+
+export const addStaffExprienceQuery = `
+INSERT INTO 
+  public."refStaffExperience" (
+    "refUserId",
+    "refPEInstitute",
+    "refPEDesignation",
+    "refPEDepartment",
+    "refPEAddress",
+    "refPEFrom",
+    "refPETo",
+    "createdAt",
+    "createdBy"
+  ) 
+VALUES 
+  (
+    $1, 
+    $2, 
+    $3, 
+    $4, 
+    $5, 
+    $6, 
+    $7, 
+    $8, 
+    $9
+  );
+`;
+
+
+export const addStaffDoctorMap = `
+INSERT INTO
+  public."refDoctorMap" (
+    "refHospitalId",
+    "refDoctorId",
+    "CreatedAt",
+    "CreatedBy"
+  )
+VALUES
+  ($1, $2, $3, $4)
+`;
+
+export const addStaffAssistantMap = `
+INSERT INTO
+  public."refAssMap" (
+    "refDoctorId",
+    "refAssId",
+    "CreatedAt",
+    "CreatedBy"
+  )
+VALUES
+  ($1, $2, $3, $4)
+`;
+
+
+export const getDoctorMapList = `
+SELECT
+  rdm."refDMId" AS "refUserId",
+  u."refUserCustId",
+  (
+    'Dr. ' || u."refUserFname" || ' ' || u."refUserLname"
+  ) AS doctorName,
+  (
+    EXISTS (
+      SELECT
+        1
+      FROM
+        public."refAssMap" ram
+      WHERE
+        ram."refDoctorId" = CAST(rdm."refDMId" AS TEXT)
+        AND ram."refAssId" = $1
+    )
+  ) AS hasAssistant
+FROM
+  public."Users" u
+  JOIN public."refDoctorMap" rdm ON rdm."refDoctorId" = CAST(u."refUserId" AS TEXT)
+  JOIN public."refHospital" rh ON rh."refHospitalId" = CAST(rdm."refHospitalId" AS INTEGER)
+WHERE
+  u."refRoleId" IN ('1', '4')
+  AND rh."refHospitalId" = $2
+`;
+
+
+export const postActiveQuery = `
+UPDATE public."Users"
+  SET 
+    "activeStatus" = $1,
+    "updatedAt" = $2,
+    "updatedBy" = $3
+  WHERE 
+    "refUserId" = $4
 `;

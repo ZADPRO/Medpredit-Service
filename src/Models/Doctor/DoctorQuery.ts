@@ -1,13 +1,13 @@
 export const checkPatientMapQuery = `
 SELECT
-  *
+*
 FROM
-  public."refPatientMap" rpm
-  JOIN public."refDoctorMap" rdm ON rdm."refDMId" = CAST(rpm."refDoctorId" AS INTEGER)
+public."refPatientMap" rpm
+JOIN public."refDoctorMap" rdm ON rdm."refDMId" = CAST(rpm."refDoctorId" AS INTEGER)
 WHERE
-  rdm."refDoctorId" = $1
-  AND rpm."refPatientId" = $2
-  AND rdm."refHospitalId" = $3
+rdm."refDoctorId" = $1
+AND rpm."refPatientId" = $2
+AND rdm."refHospitalId" = $3
   `;
 
 export const checkDoctor = `
@@ -77,28 +77,52 @@ FROM
   `;
 
 export const getAllScoreQuery = `
-  SELECT
-  *
+SELECT DISTINCT
+  ON (rusd."refQCategoryId") rusd.*,
+  rpt.*,
+  rpm.*,
+  u."refRoleId" AS doctorRoleId,
+  u."refUserFname" || ' ' || u."refUserLname" AS doctorName,
+  u."refUserId" AS doctorId,
+  rc."refCategoryLabel"
 FROM
   public."refUserScoreDetail" rusd
-  JOIN public."refPatientTransaction" rpt ON rpt."refPTId" = CAST(rusd."refPTId" AS INTEGER)
-  JOIN public."refPatientMap" rpm ON rpm."refPMId" = CAST(rpt."refPMId" AS INTEGER)
-  JOIN public."refDoctorMap" rdm ON rdm."refDMId" = CAST(rpm."refDoctorId" AS INTEGER)
-  WHERE rpm."refPatientId" = $1
-  AND rdm."refDoctorId" = $2
-  AND DATE (rpt."refPTcreatedDate") = DATE($3)
+  FULL JOIN public."refPatientTransaction" rpt ON rpt."refPTId" = CAST(rusd."refPTId" AS INTEGER)
+  FULL JOIN public."refPatientMap" rpm ON rpm."refPMId" = CAST(rpt."refPMId" AS INTEGER)
+  FULL JOIN public."Users" u ON u."refUserId" = CAST(rusd."createdBy" AS INTEGER)
+  FULL JOIN public."refCategory" rc ON rc."refQCategoryId" = rusd."refQCategoryId"::INTEGER
+WHERE
+  (
+    rpm."refPatientId" = $1
+    OR rpt."refUserId" = $1
+  )
+  AND rpt."refPTcreatedDate"::DATE <= $2::DATE
+ORDER BY
+  rusd."refQCategoryId",
+  rusd."refUSDId" DESC;
   `;
 
 export const getParticualarScoreQuery = `
-  SELECT
-  *
+SELECT DISTINCT
+  ON (rusd."refQCategoryId") rusd.*,
+  rpt.*,
+  rpm.*,
+  rusd."refQCategoryId",
+  u."refRoleId"
 FROM
   public."refUserScoreDetail" rusd
-  JOIN public."refPatientTransaction" rpt ON rpt."refPTId" = CAST(rusd."refPTId" AS INTEGER)
-  JOIN public."refPatientMap" rpm ON rpm."refPMId" = CAST(rpt."refPMId" AS INTEGER)
-  JOIN public."refDoctorMap" rdm ON rdm."refDMId" = CAST(rpm."refDoctorId" AS INTEGER)
-  WHERE rpm."refPatientId" = $1
-  AND DATE (rpt."refPTcreatedDate") = DATE($2)
+  FULL JOIN public."refPatientTransaction" rpt ON rpt."refPTId" = CAST(rusd."refPTId" AS INTEGER)
+  FULL JOIN public."refPatientMap" rpm ON rpm."refPMId" = CAST(rpt."refPMId" AS INTEGER)
+  FULL JOIN public."Users" u ON u."refUserId" = rusd."createdBy"::INTEGER
+WHERE
+  (
+    rpm."refPatientId" = $1
+    OR rpt."refUserId" = $1
+  )
+  AND DATE (rpt."refPTcreatedDate") <= DATE ($2)
+ORDER BY
+  rusd."refQCategoryId",
+  rusd."refUSDId" DESC;
   `;
 
 export const getAllScoreVerifyQuery = `
@@ -151,24 +175,17 @@ WHERE
   `;
 
 export const getDoctorDetailsReport = `
-  SELECT
-  u.*,
-  rc.*,
-  rsd.*,
-  rh.*
+SELECT
+  *
 FROM
-  public."refPatientTransaction" rpt
-  JOIN public."refUserScoreDetail" rusd ON rusd."refPTId" = CAST(rpt."refPTId" AS TEXT)
-  JOIN public."refPatientMap" rpm ON rpm."refPMId" = CAST(rpt."refPMId" AS INTEGER)
-  JOIN public."Users" u ON u."refUserId" = CAST(rpm."refDoctorId" AS INTEGER)
-  JOIN public."refCommunication" rc ON rc."refUserId" = CAST(u."refUserId" AS INTEGER)
-  JOIN public."refStaffDomain" rsd ON rsd."refUserId" = CAST(u."refUserId" AS INTEGER)
-  JOIN public."refDoctorMap" rdm ON rdm."refHospitalId" = CAST(rpm."refDoctorId" AS TEXT)
-  JOIN public."refHospital" rh ON rh."refHospitalId" = CAST(rdm."refHospitalId" AS INTEGER)
+  public."Users" u
+  FULL JOIN public."refDoctorMap" rdm ON rdm."refDMId" = CAST(u."refUserId" AS INTEGER)
+  FULL JOIN public."refHospital" rh ON rh."refHospitalId" = CAST(rdm."refHospitalId" AS INTEGER)
+  FULL JOIN public."refCommunication" rc ON rc."refUserId" = CAST(u."refUserId" AS INTEGER)
+  FULL JOIN public."refStaffDomain" rsd ON rsd."refUserId" = CAST(u."refUserId" AS INTEGER)
 WHERE
-  DATE (rpt."refPTcreatedDate") = $1
-  AND rusd."refQCategoryId" = '0'
-  AND rpm."refPatientId" = $2
+  u."refRoleId" IN ('1', '4')
+  AND u."refUserId" = $1
   `;
 
 export const getScoreReport = `
@@ -229,15 +246,16 @@ export const patientDetails = `
 FROM
   public."Users" u
   JOIN public."refPatientMap" rpm ON rpm."refPatientId" = CAST(u."refUserId" AS TEXT)
-  WHERE rpm."refPMId" = $1`;
+  WHERE rpm."refPMId" = $1
+  `;
 
 export const getTreatementDetails = `
-  SELECT
+SELECT
   *
 FROM
   public."refTreatmentDetails" rtd
   JOIN public."refPatientMap" rpm ON rpm."refPMId" = CAST(rtd."refPMId" AS INTEGER)
 WHERE
   rpm."refPatientId" = $1
-  AND DATE (rtd."refTDCreatedDate") = DATE($2)
+  AND rtd."refTDCreatedDate"::DATE = CAST($2 AS DATE)
   `;

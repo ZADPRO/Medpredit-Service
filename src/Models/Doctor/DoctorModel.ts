@@ -6,6 +6,7 @@ import {
   addUserScoreDetailsQuery,
   getCurrentInvestigation,
   getLatestPTIdQuery,
+  getPastInvestigation,
   getReportTreatmentDetails,
   getTreatmentDetails,
 } from "../Assistant/AssistantQuery";
@@ -48,6 +49,8 @@ export const checkPatientMapModel = async (
   try {
     const values = [doctorId, patientId, hospitalId];
 
+    console.log("--->>>>-----", doctorId, patientId, hospitalId);
+
     const result = await connection.query(checkPatientMapQuery, values);
 
     return {
@@ -77,6 +80,8 @@ export const addPatientMapModel = async (
       hospitalID,
       doctorId,
     ]);
+
+    console.log(hospitalID, doctorId);
 
     const values = [
       getDoctorHospitalMap.rows[0].refDMId,
@@ -108,16 +113,9 @@ export const getCurrentReportDataModel = async (
   const refPTcreatedDate = getDateOnly();
 
   try {
-    const doctorIdResult = await connection.query(getDoctorMap, [
-      hospitalId,
-      doctorId,
-    ]);
-
     const patientIdResult = await connection.query(getPatientDetail, [
       patientId,
     ]);
-
-    const doctor = doctorIdResult.rows[0];
 
     const patient = patientIdResult.rows[0];
 
@@ -125,9 +123,16 @@ export const getCurrentReportDataModel = async (
 
     const getAllScoreResult = await connection.query(getAllScoreQuery, [
       patientId,
-      doctorId,
       refPTcreatedDate,
     ]);
+
+    const doctorIdResult = await connection.query(getDoctorData, [
+      getAllScoreResult.rows[getAllScoreResult.rows.length - 1].refPMId,
+    ]);
+
+    // const doctor = doctorIdResult.rows[0];
+
+    // console.log("------->" + doctor);
 
     const getAllScoreVerify = await connection.query(getAllScoreVerifyQuery);
 
@@ -135,8 +140,6 @@ export const getCurrentReportDataModel = async (
 
     const TreatmentDetails = await connection.query(getTreatmentDetails, [
       patientId,
-      doctorId,
-      refPTcreatedDate,
     ]);
 
     const rbs = await connection.query(getCurrentInvestigation, [
@@ -265,13 +268,12 @@ export const getCurrentReportDataModel = async (
     ]);
 
     return {
-      doctorDetail: {
-        doctorName: doctor.refUserFname + " " + doctor.refUserLname,
-        doctorId: doctor.refUserCustId,
-        hospital: doctor.refHospitalName,
-        hospitalAddress:
-          doctor.refHospitalAddress + ", " + doctor.refHospitalPincode,
-      },
+      // doctorDetail: {
+      //   doctorName: doctor.doctorname,
+      //   doctorId: doctor.doctorid,
+      //   hospital: doctor.hospital,
+      //   hospitalAddress: doctor.hospitaladdress + ", " + doctor.hospitalpincode,
+      // },
       patientDetail: {
         patientName: patient.refUserFname + " " + patient.refUserLname,
         patientId: patient.refUserCustId,
@@ -449,7 +451,6 @@ export const createReportModel = async (
 export const getPastReportDataModel = async (
   patientId: any,
   doctorId: any,
-  hospitalId: any,
   reportDate: any
 ) => {
   const connection = await DB();
@@ -467,9 +468,7 @@ export const getPastReportDataModel = async (
       reportDate,
     ]);
 
-    const doctorIdResult = await connection.query(getDoctorData, [
-      getAllScoreResult.rows[0].refPMId,
-    ]);
+    const doctorIdResult = await connection.query(getDoctorData, [doctorId]);
 
     const doctor = doctorIdResult.rows[0];
 
@@ -482,131 +481,130 @@ export const getPastReportDataModel = async (
       reportDate,
     ]);
 
-    let refPTcreatedDate = reportDate;
-
-    const rbs = await connection.query(getCurrentInvestigation, [
+    const rbs = await connection.query(getPastInvestigation, [
       patientId,
       "202",
-      refPTcreatedDate,
+      reportDate,
     ]);
 
-    const fbs = await connection.query(getCurrentInvestigation, [
+    const fbs = await connection.query(getPastInvestigation, [
       patientId,
       "203",
-      refPTcreatedDate,
+      reportDate,
     ]);
 
-    const ppbs = await connection.query(getCurrentInvestigation, [
+    const ppbs = await connection.query(getPastInvestigation, [
       patientId,
       "204",
-      refPTcreatedDate,
+      reportDate,
     ]);
 
-    const ogtt = await connection.query(getCurrentInvestigation, [
+    const ogtt = await connection.query(getPastInvestigation, [
       patientId,
       "205",
-      refPTcreatedDate,
+      reportDate,
     ]);
 
-    const gct = await connection.query(getCurrentInvestigation, [
+    const gct = await connection.query(getPastInvestigation, [
       patientId,
       "206",
-      refPTcreatedDate,
+      reportDate,
     ]);
 
-    const hba1c = await connection.query(getCurrentInvestigation, [
+    const hba1c = await connection.query(getPastInvestigation, [
       patientId,
       "207",
-      refPTcreatedDate,
+      reportDate,
     ]);
 
-    const fastingcholesterol = await connection.query(getCurrentInvestigation, [
+    const fastingcholesterol = await connection.query(getPastInvestigation, [
       patientId,
       "213",
-      refPTcreatedDate,
+      reportDate,
     ]);
 
-    const fastingtriglycerides = await connection.query(
-      getCurrentInvestigation,
-      [patientId, "214", refPTcreatedDate]
-    );
+    const fastingtriglycerides = await connection.query(getPastInvestigation, [
+      patientId,
+      "214",
+      reportDate,
+    ]);
 
-    const hdl = await connection.query(getCurrentInvestigation, [
+    const hdl = await connection.query(getPastInvestigation, [
       patientId,
       "215",
-      refPTcreatedDate,
+      reportDate,
     ]);
 
-    const ldl = await connection.query(getCurrentInvestigation, [
+    const ldl = await connection.query(getPastInvestigation, [
       patientId,
       "216",
-      refPTcreatedDate,
+      reportDate,
     ]);
 
-    const tchdl = await connection.query(getCurrentInvestigation, [
+    const tchdl = await connection.query(getPastInvestigation, [
       patientId,
       "217",
-      refPTcreatedDate,
+      reportDate,
     ]);
 
-    const kr = await connection.query(getCurrentInvestigation, [
+    const kr = await connection.query(getPastInvestigation, [
       patientId,
       "225",
-      refPTcreatedDate,
+      reportDate,
     ]);
 
-    const kl = await connection.query(getCurrentInvestigation, [
+    const kl = await connection.query(getPastInvestigation, [
       patientId,
       "228",
-      refPTcreatedDate,
+      reportDate,
     ]);
 
-    const echo = await connection.query(getCurrentInvestigation, [
+    const echo = await connection.query(getPastInvestigation, [
       patientId,
       "231",
-      refPTcreatedDate,
+      reportDate,
     ]);
 
-    const cortico = await connection.query(getCurrentInvestigation, [
+    const cortico = await connection.query(getPastInvestigation, [
       patientId,
       "234",
-      refPTcreatedDate,
+      reportDate,
     ]);
 
-    const bloodurea = await connection.query(getCurrentInvestigation, [
+    const bloodurea = await connection.query(getPastInvestigation, [
       patientId,
       "218",
-      refPTcreatedDate,
+      reportDate,
     ]);
 
-    const serum = await connection.query(getCurrentInvestigation, [
+    const serum = await connection.query(getPastInvestigation, [
       patientId,
       "219",
-      refPTcreatedDate,
+      reportDate,
     ]);
 
-    const egfr = await connection.query(getCurrentInvestigation, [
+    const egfr = await connection.query(getPastInvestigation, [
       patientId,
       "220",
-      refPTcreatedDate,
+      reportDate,
     ]);
 
-    const urinesugar = await connection.query(getCurrentInvestigation, [
+    const urinesugar = await connection.query(getPastInvestigation, [
       patientId,
       "221",
-      refPTcreatedDate,
+      reportDate,
     ]);
 
-    const urinealbumin = await connection.query(getCurrentInvestigation, [
+    const urinealbumin = await connection.query(getPastInvestigation, [
       patientId,
       "222",
-      refPTcreatedDate,
+      reportDate,
     ]);
 
-    const urineketones = await connection.query(getCurrentInvestigation, [
+    const urineketones = await connection.query(getPastInvestigation, [
       patientId,
       "223",
-      refPTcreatedDate,
+      reportDate,
     ]);
 
     return {
@@ -659,24 +657,119 @@ export const getPastReportDataModel = async (
   }
 };
 
-export const getReportPDFModel = async (patientId: any, reportDate: any) => {
+const getValidateDuration = (questionId: any) => {
+  switch (parseInt(questionId)) {
+    case 94:
+      return 1;
+    case 6:
+      return 1;
+    case 8:
+      return 14;
+    case 9:
+      return 14;
+    case 10:
+      return 14;
+    case 11:
+      return 14;
+    case 12:
+      return 14;
+    case 13:
+      return 14;
+    case 43:
+      return 14;
+    case 51:
+      return 14;
+    case 202:
+      return 1;
+    case 203:
+      return 1;
+    case 204:
+      return 1;
+    case 205:
+      return 1;
+    case 206:
+      return 1;
+    case 207:
+      return 1;
+    case 213:
+      return 1;
+    case 214:
+      return 1;
+    case 215:
+      return 1;
+    case 216:
+      return 1;
+    case 217:
+      return 1;
+    case 218:
+      return 1;
+    case 219:
+      return 1;
+    case 220:
+      return 1;
+    case 221:
+      return 1;
+    case 222:
+      return 1;
+    case 223:
+      return 1;
+    case 224:
+      return 1;
+    case 237:
+      return 1;
+    case 238:
+      return 1;
+    case 22:
+      return 14;
+    case 23:
+      return 14;
+    case 24:
+      return 14;
+    default:
+      return 0;
+  }
+};
+
+function calculateDaysDifference(dateString: any, reportDate: any) {
+  // Convert the given date string to a Date object
+  const givenDate: any = new Date(dateString);
+
+  // Get the current date and set time to midnight for accurate day difference
+  const currentDate: any = new Date(reportDate);
+  currentDate.setHours(0, 0, 0, 0);
+
+  // Calculate the difference in milliseconds
+  const diffInMs = givenDate - currentDate;
+
+  // Convert milliseconds to days
+  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+  return diffInDays;
+}
+
+export const getCurrentReportPDFModel = async (
+  patientId: any,
+  reportDate: any,
+  doctorId: any
+) => {
   const connection = await DB();
+
+  const createdAt = CurrentTime();
+
+  console.log("====================================");
+  console.log(reportDate, createdAt);
+  console.log("====================================");
+
   try {
-    console.log(patientId, reportDate);
+    const patientResult = await connection.query(getPatientDetail, [patientId]);
+
+    const scoreResult = await connection.query(getAllScoreQuery, [
+      patientId,
+      reportDate,
+    ]);
 
     const doctorResult = await connection.query(getDoctorDetailsReport, [
-      reportDate,
-      patientId,
-    ]);
-
-    const patientResult = await connection.query(getPatientDetailsReport, [
-      reportDate,
-      patientId,
-    ]);
-
-    const scoreResult = await connection.query(getScoreReport, [
-      reportDate,
-      patientId,
+      doctorId,
     ]);
 
     const scoreVerifyResult = await connection.query(getScoreVerifyReport);
@@ -685,8 +778,50 @@ export const getReportPDFModel = async (patientId: any, reportDate: any) => {
 
     const treatementDetails = await connection.query(getTreatementDetails, [
       patientId,
-      reportDate,
+      createdAt,
     ]);
+
+    const groupedData: Record<
+      string,
+      { category: string; doctorid: number }[]
+    > = scoreResult.rows.reduce((acc, row: any) => {
+      console.log(row.refQCategoryId);
+
+      if (
+        getValidateDuration(row.refQCategoryId) >
+        -calculateDaysDifference(row.refPTcreatedDate, reportDate)
+      ) {
+        if (!acc[row.doctorname]) {
+          acc[row.doctorname] = [];
+        }
+        acc[row.doctorname].push({
+          category: row.refCategoryLabel,
+          doctorid: row.doctorroleid,
+        });
+      }
+
+      return acc; // Ensure the accumulator is always returned
+    }, {});
+
+    // Convert grouped data into the required string format
+    const resultString = Object.entries(groupedData)
+      .map(([doctorname, categories]) => {
+        const doctorid =
+          categories.length > 0 ? categories[0].doctorid : "Unknown"; // Get doctorid from first entry
+        const categoryList = categories.map((c) => c.category).join(", ");
+        return `[ ${categoryList} - ${doctorname} (${
+          doctorid === 1 || doctorid === 4
+            ? "Doctor"
+            : doctorid === 2
+            ? "Assistant"
+            : doctorid === 3
+            ? "Self"
+            : null
+        }) ]`;
+      })
+      .join(", ");
+
+    console.log(resultString);
 
     return {
       status: true,
@@ -694,7 +829,60 @@ export const getReportPDFModel = async (patientId: any, reportDate: any) => {
       patientDetails: patientResult.rows[0],
       scoreResult: scoreResult.rows,
       scoreVerifyResult: scoreVerifyResult.rows,
-      generateDate: scoreResult.rows[0].refPTcreatedDate,
+      generateDate: createdAt,
+      categoryResult: categoryResult.rows,
+      treatmentDetails: treatementDetails.rows,
+      content: resultString,
+    };
+  } catch (error) {
+    console.error("Something went Wrong", error);
+    throw error;
+  } finally {
+    await connection.end();
+  }
+};
+
+export const getPastReportPDFModel = async (
+  patientId: any,
+  refPMId: any,
+  fromDate: any,
+  toDate: any
+) => {
+  const connection = await DB();
+
+  try {
+    const patientResult = await connection.query(getPatientDetail, [patientId]);
+
+    const scoreResult = await await connection.query(getParticualarScoreQuery, [
+      patientId,
+      fromDate,
+      toDate === "0" ? fromDate.slice(0, 7) + "-31" : toDate,
+    ]);
+
+    const doctorResult = await connection.query(getDoctorDetailsReport, [
+      refPMId,
+    ]);
+
+    const scoreVerifyResult = await connection.query(getScoreVerifyReport);
+
+    const categoryResult = await connection.query(getAllCategoryFamilyHistory);
+
+    const treatementDetails = await connection.query(
+      getReportTreatmentDetails,
+      [
+        patientId,
+        fromDate,
+        toDate === "0" ? fromDate.slice(0, 7) + "-31" : toDate,
+      ]
+    );
+
+    return {
+      status: true,
+      doctorDetails: doctorResult.rows[0],
+      patientDetails: patientResult.rows[0],
+      scoreResult: scoreResult.rows,
+      scoreVerifyResult: scoreVerifyResult.rows,
+      generateDate: fromDate,
       categoryResult: categoryResult.rows,
       treatmentDetails: treatementDetails.rows,
     };

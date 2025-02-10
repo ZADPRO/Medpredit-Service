@@ -95,4 +95,6 @@ AssistantRoutes.post(
   deleteInvestigationDetailController
 );
 
+AssistantRoutes.post("/postNewSignup", postNewPatientController);
+
 export default AssistantRoutes;

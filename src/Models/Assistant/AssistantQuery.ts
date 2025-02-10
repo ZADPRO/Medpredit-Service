@@ -14,9 +14,17 @@ FROM
 WHERE 
   us."refRoleId" = 3;`;
 
+export const overAllId = `
+SELECT
+  MAX(u."refUserId") + 1 as "overAllId"
+FROM
+  public."Users" u
+  `;
+
 export const postNewUser = `
   INSERT INTO
   public."Users" (
+    "refUserId",
     "refUserCustId",
     "refRoleId",
     "refUserFname",
@@ -27,11 +35,12 @@ export const postNewUser = `
     "refEducation",
     "refOccupationLvl",
     "refSector",
+    "activeStatus",
     "createdAt",
     "createdBy"
   )
 VALUES
-  ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+  ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
 `;
 
 export const getUserId = `
@@ -163,6 +172,21 @@ values
   ($1, $2, $3, $4, $5, $6, $7)
 `;
 
+export const addPatientIdTransactionQuery = `
+insert into
+  public."refPatientTransaction" (
+    "refPTId",
+    "refUserId",
+    "refPTScore",
+    "refPTStatus",
+    "refPTcreatedDate",
+    "createdAt",
+    "createdBy"
+  )
+values
+  ($1, $2, $3, $4, $5, $6, $7)
+`;
+
 export const addUserScoreDetailsQuery = `
 insert into
   public."refUserScoreDetail" (
@@ -180,16 +204,21 @@ SELECT
   *
 FROM
   public."refUserScoreDetail" rusd
-  JOIN public."refPatientTransaction" rpt ON rpt."refPTId" = CAST(rusd."refPTId" AS INTEGER)
-  JOIN public."refPatientMap" rpm ON rpm."refPMId" = CAST(rpt."refPMId" AS INTEGER)
-  JOIN public."refDoctorMap" rdm ON rdm."refDMId" = CAST(rpm."refDoctorId" AS INTEGER)
+  FULL JOIN public."refPatientTransaction" rpt ON rpt."refPTId" = CAST(rusd."refPTId" AS INTEGER)
+  FULL JOIN public."refPatientMap" rpm ON rpm."refPMId" = CAST(rpt."refPMId" AS INTEGER)
+  FULL JOIN public."refDoctorMap" rdm ON rdm."refDMId" = CAST(rpm."refDoctorId" AS INTEGER)
 WHERE
-  rpm."refPatientId" = $1
+  (
+    rpm."refPatientId" = $1
+    OR rpt."refUserId" = $1
+  )
   AND rusd."refQCategoryId" = $2
-  AND rdm."refHospitalId" = $3
-  AND rdm."refDoctorId" = $4
-  AND DATE (rpt."refPTcreatedDate") = $5
+ORDER BY
+  rusd."refUSDId" DESC
 `;
+// AND rdm."refHospitalId" = $3
+//   AND rdm."refDoctorId" = $4
+// AND DATE (rpt."refPTcreatedDate") = $5
 
 export const getPasswordQuery = `
 SELECT
@@ -203,14 +232,14 @@ WHERE
 export const getAssistantDoctorQuery = `
 SELECT
   ram."refAMId",
-  ram."refDoctorId",
+  rdm."refDoctorId",
   ram."refAssId",
   u."refUserFname" AS "DoctorFirstName",
   u."refUserLname" AS "DoctorLastName"
 FROM
   public."refAssMap" ram
-  JOIN public."Users" u ON CAST(ram."refDoctorId" AS TEXT) = CAST(u."refUserId" AS TEXT)
   JOIN public."refDoctorMap" rdm ON rdm."refDMId" = CAST(ram."refDoctorId" AS INTEGER)
+  JOIN public."Users" u ON u."refUserId" = CAST(rdm."refDoctorId" AS INTEGER)
 WHERE
   ram."refAssId" = $1
   AND rdm."refHospitalId" = $2
@@ -247,56 +276,40 @@ WHERE
 `;
 
 export const postPastReport = `
-SELECT
-  rus."refUSDId",
-  rpm."refPatientId",
-  rus."refQCategoryId",
-  rpt."refPTScore",
-  rus."createdAt" AS "createdAt",
-  rpm."refDoctorId",
-  (
-    SELECT
-      u."refUserFname" || ' ' || u."refUserLname"
-    FROM
-      public."Users" u
-    WHERE
-      u."refUserId" = CAST(rdm."refDoctorId" AS INTEGER)
-  ) AS doctorName,
-  rdm."refHospitalId",
-  (
-    SELECT
-      rh."refHospitalName"
-    FROM
-      public."refHospital" rh
-    WHERE
-      rh."refHospitalId" = CAST(rdm."refHospitalId" AS INTEGER)
-  ) AS hospitalName,
-  (
-    SELECT
-      rh."refHospitalAddress"
-    FROM
-      public."refHospital" rh
-    WHERE
-      rh."refHospitalId" = CAST(rdm."refHospitalId" AS INTEGER)
-  ) AS hospitalAddress,
-  (
-    SELECT
-      rh."refHospitalPincode"
-    FROM
-      public."refHospital" rh
-    WHERE
-      rh."refHospitalId" = CAST(rdm."refHospitalId" AS INTEGER)
-  ) AS hospitalPincode
+SELECT DISTINCT
+  TO_CHAR(
+    CAST(rpt."refPTcreatedDate" AS TIMESTAMP),
+    'YYYY-MM'
+  ) AS refPTcreatedDate
 FROM
-  public."refUserScoreDetail" rus
-  JOIN public."refPatientTransaction" rpt ON rpt."refPTId" = CAST(rus."refPTId" AS INTEGER)
+  public."refPatientTransaction" rpt
   JOIN public."refPatientMap" rpm ON rpm."refPMId" = CAST(rpt."refPMId" AS INTEGER)
-  JOIN public."refDoctorMap" rdm ON rdm."refDMId" = CAST(rpm."refDoctorId" AS INTEGER)
+  WHERE rpm."refPatientId" = $1
+ORDER BY
+  refPTcreatedDate DESC;
+`;
+
+export const postReportParticularDate = `
+SELECT DISTINCT
+  TO_CHAR(
+    CAST(rpt."refPTcreatedDate" AS TIMESTAMP),
+    'YYYY-MM-DD'
+  ) AS refPTcreatedDate
+FROM
+  "refPatientTransaction" rpt
+  FULL JOIN public."refPatientMap" rpm ON rpm."refPMId" = CAST(rpt."refPMId" AS INTEGER)
 WHERE
-  rpm."refPatientId" = $1
-  AND rus."refQCategoryId" = '0'
-  AND DATE(rpt."refPTcreatedDate") <= DATE ($2)
-  ORDER BY rus."refUSDId" DESC
+  EXTRACT(
+    YEAR
+    FROM
+      rpt."refPTcreatedDate"::TIMESTAMP
+  ) = $1
+  AND EXTRACT(
+    MONTH
+    FROM
+      rpt."refPTcreatedDate"::TIMESTAMP
+  ) = $2
+  AND (rpm."refPatientId" = $3 OR rpt."refUserId" = $3)
 `;
 
 export const postCurrentReport = `
@@ -417,8 +430,7 @@ WHERE
   AND rh."refHospitalId" = $2;
   `;
 
-
-  export const getProfileQueryAssistant = `
+export const getProfileQueryAssistant = `
 SELECT
   u."refUserCustId",
   u."refUserFname" || ' ' || u."refUserLname" AS "refUserName",
@@ -426,26 +438,40 @@ SELECT
   rh."refHospitalName"
 FROM
   public."Users" u
-  JOIN public."refAssMap" ram ON ram."refAssId" = CAST(u."refUserId" AS TEXT)
-  JOIN public."refDoctorMap" rdm ON rdm."refDoctorId" = CAST(ram."refDoctorId" AS TEXT)
-  JOIN public."refHospital" rh ON rh."refHospitalId" = CAST(rdm."refHospitalId" AS INTEGER)
+  JOIN public."refAssMap" ram ON ram."refAssId" = u."refUserId"::TEXT
+  JOIN public."refDoctorMap" rdm ON rdm."refDMId" = ram."refDoctorId"::INTEGER
+  JOIN public."refHospital" rh ON rh."refHospitalId" = rdm."refHospitalId"::INTEGER
 WHERE
   u."refUserId" = $1
-  AND rh."refHospitalId" = $2;
+  AND rh."refHospitalId" = $2
+LIMIT
+  1
   `;
 
-export const getReportSessionQuery = `
-SELECT
-  *
+export const getProfileQueryUsers = `
+  SELECT
+  u."refUserFname" || ' ' || u."refUserLname" AS "refUserName",
+  u."refUserCustId",
+  rc."refDistrict" AS "refHospitalName"
 FROM
-  public."refUserScoreDetail" rusd
-  JOIN public."refPatientTransaction" rpt ON rpt."refPTId" = CAST(rusd."refPTId" AS INTEGER)
-  JOIN public."refPatientMap" rpm ON rpm."refPMId" = CAST(rpt."refPMId" AS INTEGER)
+  public."Users" u
+  JOIN public."refCommunication" rc ON rc."refUserId" = u."refUserId"
 WHERE
-  rpm."refPatientId" = $1
-  AND rusd."refQCategoryId" = '0'
-  ORDER BY rusd."refUSDId" DESC
+  u."refUserId" = $1
   `;
+
+// export const getReportSessionQuery = `
+// SELECT
+//   *
+// FROM
+//   public."refUserScoreDetail" rusd
+//   JOIN public."refPatientTransaction" rpt ON rpt."refPTId" = CAST(rusd."refPTId" AS INTEGER)
+//   JOIN public."refPatientMap" rpm ON rpm."refPMId" = CAST(rpt."refPMId" AS INTEGER)
+// WHERE
+//   rpm."refPatientId" = $1
+//   AND rusd."refQCategoryId" = '0'
+//   ORDER BY rusd."refUSDId" DESC
+//   `;
 
 export const getQuestionScoreQuery = `
   SELECT
@@ -526,12 +552,10 @@ FROM
   JOIN public."refDoctorMap" rdm ON rdm."refDMId" = CAST(rpm."refDoctorId" AS INTEGER)
 WHERE
   rpm."refPatientId" = $1
-  AND rdm."refDoctorId" = $2
-  AND DATE (rtd."refTDCreatedDate") = DATE($3)
   `;
 
-  export const getReportTreatmentDetails = `
-  SELECT
+export const getReportTreatmentDetails = `
+SELECT
   *
 FROM
   public."refTreatmentDetails" rtd
@@ -539,7 +563,7 @@ FROM
   JOIN public."refDoctorMap" rdm ON rdm."refDMId" = CAST(rpm."refDoctorId" AS INTEGER)
 WHERE
   rpm."refPatientId" = $1
-  AND DATE (rtd."refTDCreatedDate") = DATE($2)
+  AND DATE (rtd."refTDCreatedDate") <= DATE ($2)
   `;
 
 export const insertInvestigationDetails = `
@@ -625,4 +649,35 @@ FROM (
 ) AS subquery
 ORDER BY
   subquery."refIVDDate" ASC;
+  `;
+
+export const getPastInvestigation = `
+  SELECT
+  *
+FROM (
+  SELECT
+    rivd."refIVDDate",
+    rivd."refIVDScore"
+  FROM
+    public."refInvestigationDetails" rivd
+  WHERE
+    rivd."refUserId" = $1 
+    AND rivd."refQCategoryId" = $2
+    AND rivd."refIVDDate"::date <= DATE($3)
+  ORDER BY
+    rivd."refIVDDate" DESC
+  LIMIT
+    5
+) AS subquery
+ORDER BY
+  subquery."refIVDDate" ASC;
+  `;
+
+export const checkMobileNumberQuery = `
+  SELECT
+  *
+FROM
+  public."refCommunication"
+WHERE
+  "refUserMobileno" = $1
   `;

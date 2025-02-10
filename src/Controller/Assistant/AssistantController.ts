@@ -61,10 +61,10 @@ const postNewPatientController = async (req, res) => {
 
     console.log(hashedPassword);
 
-    const HigherUser = req.userData.userid;
-    const hospitalId = req.userData.hospitalid;
+    const HigherUser = req.userData ? req.userData.userid : "self";
+    const hospitalId = req.userData ? req.userData.hospitalid : "self";
 
-    const createdBy = req.userData.userid;
+    const createdBy = req.userData ? req.userData.userid : "self";
     const createdAt = CurrentTime();
 
     const values = {
@@ -99,7 +99,7 @@ const postNewPatientController = async (req, res) => {
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
     console.error("Something went Wrong", error);
-    return res.status(500).json({ error: "Something went Wrong" });
+    return res.status(500).json({ error: "Something went Wrong" + error });
   }
 };
 
@@ -361,14 +361,18 @@ const getUserScoreVerifyController = async (req, res) => {
 
 const getProfileController = async (req, res) => {
   try {
-    const { hospitalId } = req.body;
+    const { hospitalId, roleId } = req.body;
 
-    console.log(hospitalId);
+    console.log(hospitalId, roleId);
 
-    const result = await getProfileModel(req.userData.userid, hospitalId);
+    const result = await getProfileModel(
+      req.userData.userid,
+      hospitalId,
+      roleId
+    );
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
-    console.error("Something went Wrong");
+    console.error("Something went Wrong", error);
     return res.status(500).json({ error: "Something went Wrong" });
   }
 };
