@@ -478,6 +478,8 @@ export const getDoctorMapListModels = async (
       assistantId,
     ]);
 
+    console.log(userStatus.rows[0].activeStatus);
+
     return {
       status: true,
       doctorMapList: result.rows,
