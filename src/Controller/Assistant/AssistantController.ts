@@ -1,5 +1,6 @@
 import { encrypt } from "../../Helper/Encryption";
 const bcrypt = require("bcrypt");
+const logger = require("../../Helper/Logger");
 
 import {
   getPatientDataModels,
@@ -31,6 +32,7 @@ const getPatientDataController = async (req, res) => {
 
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
+    logger.error(`Patient Get (getPatientData) Error: (${error})`);
     console.error("Something went Wrong");
     return res.status(500).json({ error: "Something went Wrong" });
   }
@@ -59,9 +61,7 @@ const postNewPatientController = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(refUserPassword, salt);
 
-    console.log(hashedPassword);
-
-    const HigherUser = req.userData ? req.userData.userid : "self";
+    const HigherUser = req.userData.userid;
     const hospitalId = req.userData ? req.userData.hospitalid : "self";
 
     const createdBy = req.userData ? req.userData.userid : "self";
@@ -96,10 +96,14 @@ const postNewPatientController = async (req, res) => {
 
     const result = await postNewPatientModels(values);
 
+    logger.info(`New User (${refUserMobileno}) Created by : (${HigherUser})`);
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
+    logger.error(
+      `New Patient Create (postNewPatientController) Error: (${error})`
+    );
     console.error("Something went Wrong", error);
-    return res.status(500).json({ error: "Something went Wrong" + error });
+    return res.status(500).json({ error: "Something went Wrong" });
   }
 };
 
@@ -144,8 +148,15 @@ const postFamilyUserController = async (req, res) => {
 
     const result = await postFamilyUserModel(values);
 
+    logger.info(
+      `New Family User (${refUserMobileno}) Created by : (${refUserId})`
+    );
+
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
+    logger.error(
+      `New Family Patient Create (postFamilyUserController) Error: (${error})`
+    );
     console.error("Something went Wrong", error);
     return res.status(500).json({ error: "Something went Wrong" });
   }
@@ -165,6 +176,7 @@ const getMainCategoryController = async (req, res) => {
 
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
+    logger.error(`Main Category (getMainCategoryController) Error: (${error})`);
     console.error("Something went Wrong");
     return res.status(500).json({ error: "Something went Wrong" });
   }
@@ -184,6 +196,9 @@ const getSubMainCategoryController = async (req, res) => {
 
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
+    logger.error(
+      `Sub-Main Category (getSubMainCategoryController) Error: (${error})`
+    );
     console.error("Something went Wrong");
     return res.status(500).json({ error: "Something went Wrong" });
   }
@@ -206,6 +221,7 @@ const getCategoryController = async (req, res) => {
     );
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
+    logger.error(`Category (getCategoryController) Error: (${error})`);
     console.error("Something went Wrong");
     return res.status(500).json({ error: "Something went Wrong" + error });
   }
@@ -222,6 +238,7 @@ const getQuestionsController = async (req, res) => {
     );
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
+    logger.error(`Getting Question (getQuestionsController) Error: (${error})`);
     console.error("Something went Wrong");
     return res.status(500).json({ error: "Something went Wrong" });
   }
@@ -248,8 +265,11 @@ const postAnswersController = async (req, res) => {
       hospitalId
     );
 
+    logger.info(`User (${patientId}) Answered (${categoryId})`);
+
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
+    logger.error(`POst Answer (postAnswersController) Error: (${error})`);
     console.error("Something went Wrong");
     return res.status(500).json({ error: "Something went Wrong" });
   }
@@ -266,6 +286,9 @@ const getAssistantDoctorController = async (req, res) => {
 
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
+    logger.error(
+      `Assistant Doctor Map (getAssistantDoctorController) Error: (${error})`
+    );
     console.error("Something went Wrong");
     return res.status(500).json({ error: "Something went Wrong" });
   }
@@ -289,8 +312,11 @@ const resetScoreController = async (req, res) => {
       doctorId
     );
 
+    logger.info(`User (${refPatientId}) score restted for (${refQCategoryId})`);
+
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
+    logger.error(`User score Reset (resetScoreController) Error: (${error})`);
     console.error("Something went Wrong");
     return res.status(500).json({ error: "Something went Wrong" });
   }
@@ -304,6 +330,7 @@ const postPastReportController = async (req, res) => {
 
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
+    logger.error(`Past Report (postPastReportController) Error: (${error})`);
     console.error("Something went Wrong");
     return res.status(500).json({ error: "Something went Wrong" + error });
   }
@@ -328,6 +355,9 @@ const postCurrentReportContoller = async (req, res) => {
 
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
+    logger.error(
+      `Current Report (postCurrentReportContoller) Error: (${error})`
+    );
     console.error("Something went Wrong", error);
     return res.status(500).json({ error: "Something went Wrong" + error });
   }
@@ -341,6 +371,7 @@ const getPastReportController = async (req, res) => {
 
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
+    logger.error(`Past Report (getPastReportController) Error: (${error})`);
     console.error("Something went Wrong");
     return res.status(500).json({ error: "Something went Wrong" });
   }
@@ -354,6 +385,9 @@ const getUserScoreVerifyController = async (req, res) => {
 
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
+    logger.error(
+      `Score Verify (getUserScoreVerifyController) Error: (${error})`
+    );
     console.error("Something went Wrong");
     return res.status(500).json({ error: "Something went Wrong" });
   }
@@ -372,6 +406,7 @@ const getProfileController = async (req, res) => {
     );
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
+    logger.error(`Profile Data (getProfileController) Error: (${error})`);
     console.error("Something went Wrong", error);
     return res.status(500).json({ error: "Something went Wrong" });
   }
@@ -385,6 +420,9 @@ const getQuestionScoreController = async (req, res) => {
 
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
+    logger.error(
+      `Question Score (getQuestionScoreController) Error: (${error})`
+    );
     console.error("Something went Wrong");
     return res.status(500).json({ error: "Something went Wrong" });
   }
@@ -397,6 +435,9 @@ const getInvestigationDetailsController = async (req, res) => {
 
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
+    logger.error(
+      `Investigation Details (getInvestigationDetailsController) Error: (${error})`
+    );
     console.error("Something went Wrong");
     return res.status(500).json({ error: "Something went Wrong" });
   }
@@ -410,6 +451,9 @@ const deleteInvestigationDetailController = async (req, res) => {
 
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
+    logger.error(
+      `Delete Investigation (deleteInvestigationDetailController) Error: (${error})`
+    );
     console.error("Something went Wrong");
     return res.status(500).json({ error: "Something went Wrong" });
   }

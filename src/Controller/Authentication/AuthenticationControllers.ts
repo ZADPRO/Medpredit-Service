@@ -13,6 +13,7 @@ import { encrypt } from "../../Helper/Encryption";
 import { CurrentTime } from "../../Helper/CurrentTime";
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const logger = require("../../Helper/Logger");
 
 const usersignin = async (req, res) => {
   try {
@@ -22,9 +23,13 @@ const usersignin = async (req, res) => {
 
     const result = await usersigninModel(username, password);
 
+    logger.info(`User Signed In (${username})`);
+
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
     console.error("Something went Wrong", error);
+
+    logger.error(`User Signed In Error: (${error})`);
     return res.status(500).json({ error: "Something went Wrong" + error });
   }
 };
@@ -35,8 +40,11 @@ const handleUserSigninController = async (req, res) => {
 
     const result = await handleUserSigninModel(username, password, userId);
 
+    logger.info(`User Signed In (${username})`);
+
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
+    logger.error(`User Signed In Error: (${error})`);
     console.error("Something went Wrong", error);
     return res.status(500).json({ error: "Something went Wrong" + error });
   }
@@ -67,7 +75,8 @@ const verifyEnteruserData = async (req, res) => {
     return res.status(200).json({ data: result });
   } catch (error) {
     console.error("Something went Wrong");
-    return res.status(500).json({ error: "Something went Wrong --44" });
+    logger.error(`VerifyEnterUser Data Error: (${error})`);
+    return res.status(500).json({ error: "Something went Wrong" });
   }
 };
 
@@ -84,8 +93,11 @@ const changePasswordController = async (req, res) => {
 
     console.log(result);
 
+    logger.info(`Password change for refUserId: (${req.userData.userid})`);
+
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
+    logger.error(`Password change Error: (${error})`);
     console.error("Something went Wrong");
     return res.status(500).json({ error: "Something went Wrong " });
   }
@@ -99,6 +111,7 @@ const getUserListController = async (req, res) => {
 
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
+    logger.error(`getUserListController Error: (${error})`);
     console.error("Something went Wrong");
     return res.status(500).json({ error: "Something went Wrong" });
   }
@@ -184,8 +197,13 @@ const signUpDoctorsControllers = async (req, res) => {
 
     const result = await signUpDoctorsModels(values);
 
+    logger.info(
+      `Doctor Signup Successfully (signUpDoctors) (${refUserMobileno})`
+    );
+
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
+    logger.error(`Doctor Signup (signUpDoctors) Error: (${error})`);
     console.error("Something went Wrong");
     return res.status(500).json({ error: "Something went Wrong" });
   }
@@ -199,6 +217,7 @@ const getDoctorMapListControllers = async (req, res) => {
 
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
+    logger.error(`Doctor MapList (getDoctorMapList) Error: (${error})`);
     console.error("Something went Wrong");
     return res.status(500).json({ error: "Something went Wrong" });
   }
@@ -218,8 +237,13 @@ const addAssistantMapController = async (req, res) => {
       createdBy
     );
 
+    logger.info(
+      `Assiatnt ID: {${assistantId}} Mapped for DoctorID: (${doctorId})`
+    );
+
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
+    logger.error(`Assistant Mapping (addAssistantMap) Error: (${error})`);
     console.error("Something went Wrong");
     return res.status(500).json({ error: "Something went Wrong" });
   }
@@ -239,8 +263,13 @@ const postActiveStatusController = async (req, res) => {
       updatedBy
     );
 
+    logger.info(`Docotr ID: ${doctorId} Status Changed as (${value})`);
+
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
+    logger.error(
+      `Active Status (postActiveStatusController) Error: (${error})`
+    );
     console.error("Something went Wrong");
     return res.status(500).json({ error: "Something went Wrong" });
   }

@@ -7,8 +7,6 @@ import DoctorRoutes from "./Routes/Doctor/DoctorRoutes";
 import PatientRoutes from "./Routes/Patient/PatientRoutes";
 const cors = require("cors");
 
-import userRoutes from "./Routes/User/UserRoutes";
-
 const app = express();
 
 app.use(express.json());
@@ -19,7 +17,6 @@ app.use(
   })
 );
 
-app.use("/api/v1", userRoutes);
 app.use("/api/v1", AuthenticationRoutes);
 app.use("/api/v1", AssistantRoutes);
 app.use("/api/v1", DoctorRoutes);

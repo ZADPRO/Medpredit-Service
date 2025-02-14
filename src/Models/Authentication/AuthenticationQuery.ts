@@ -1,11 +1,13 @@
-export const usersigninQuery = `SELECT * FROM 
+export const usersigninQuery = `
+SELECT * FROM 
 public."refCommunication" rc
 JOIN public."Users" u
 ON rc."refUserId" = u."refUserId"
 JOIN public."refUserDomain" rud
 ON rc."refUserId" = rud."refUserId"
-WHERE rc."refUserMobileno" = $1`;
-
+WHERE rc."refUserMobileno" = $1
+AND u."activeStatus" = 'active'
+`;
 
 export const userParticularSiginQuery = `
 SELECT
@@ -171,7 +173,6 @@ WHERE
   "refUserId" = $3;
 `;
 
-
 export const getDoctorList = `
 SELECT DISTINCT
   ON (u."refUserId") rdm."refDMId" AS "code",
@@ -189,9 +190,27 @@ WHERE
   AND rdm."refHospitalId" = $1
 `;
 
+export const getDoctorListActive = `
+SELECT DISTINCT
+  ON (u."refUserId") rdm."refDMId" AS "code",
+  u."refUserCustId",
+  (
+    'Dr. ' || u."refUserFname" || ' ' || u."refUserLname"
+  ) AS "name",
+  u."activeStatus",
+  u."refUserId" AS "Id"
+FROM
+  public."Users" u
+  JOIN public."refDoctorMap" rdm ON rdm."refDoctorId" = CAST(u."refUserId" AS TEXT)
+WHERE
+  u."refRoleId" IN ('1', '4')
+  AND rdm."refHospitalId" = $1
+  AND u."activeStatus" = 'active'
+`;
+
 export const getAssistantList = `
-SELECT DISTINCT ON (ram."refAssId")
-  u."refUserId" AS "code",
+SELECT DISTINCT
+  ON (ram."refAssId") u."refUserId" AS "code",
   (u."refUserFname" || ' ' || u."refUserLname") AS "name",
   u."refUserCustId"
 FROM
@@ -201,9 +220,10 @@ FROM
 WHERE
   u."refRoleId" = $1
   AND rdm."refHospitalId" = $2
-ORDER BY ram."refAssId";
+  AND u."activeStatus" = 'active'
+ORDER BY
+  ram."refAssId";
 `;
-
 
 export const nextDoctorId = `
 SELECT 
@@ -213,7 +233,6 @@ FROM
 WHERE 
   us."refRoleId" IN ('1', '4');
 `;
-
 
 export const nextStaffId = `
 SELECT 
@@ -333,7 +352,6 @@ VALUES
   );
 `;
 
-
 export const addStaffDoctorMap = `
 INSERT INTO
   public."refDoctorMap" (
@@ -357,7 +375,6 @@ INSERT INTO
 VALUES
   ($1, $2, $3, $4)
 `;
-
 
 export const getDoctorMapList = `
 SELECT
@@ -386,7 +403,6 @@ WHERE
   AND rh."refHospitalId" = $2
 `;
 
-
 export const postActiveQuery = `
 UPDATE public."Users"
   SET 
@@ -395,4 +411,13 @@ UPDATE public."Users"
     "updatedBy" = $3
   WHERE 
     "refUserId" = $4
+`;
+
+export const getUserActiveStatus = `
+SELECT
+  u."activeStatus"
+FROM
+  public."Users" u
+WHERE
+  u."refUserId" = $1
 `;

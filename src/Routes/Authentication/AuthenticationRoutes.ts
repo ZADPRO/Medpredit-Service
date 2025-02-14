@@ -10,7 +10,7 @@ const {
   getDoctorMapListControllers,
   addAssistantMapController,
   postActiveStatusController,
-  handleUserSigninController
+  handleUserSigninController,
 } = require("../../Controller/Authentication/AuthenticationControllers");
 
 const AuthenticationRoutes = express.Router();
@@ -29,10 +29,7 @@ AuthenticationRoutes.post(
   changePasswordController
 );
 
-AuthenticationRoutes.post("/getUserList",
-  verifyToken,
-  getUserListController
-)
+AuthenticationRoutes.post("/getUserList", verifyToken, getUserListController);
 
 AuthenticationRoutes.post(
   "/signUpDoctors",
@@ -40,30 +37,24 @@ AuthenticationRoutes.post(
   signUpDoctorsControllers
 );
 
-
 AuthenticationRoutes.post(
   "/doctorsMapList",
   verifyToken,
   getDoctorMapListControllers
-)
-
+);
 
 AuthenticationRoutes.post(
   "/addAssistantMap",
   verifyToken,
   addAssistantMapController
-)
+);
 
 AuthenticationRoutes.post(
   "/postActiveStatus",
   verifyToken,
   postActiveStatusController
-)
+);
 
-AuthenticationRoutes.post(
-  "/handleUserSignin",
-  handleUserSigninController,
-)
-
+AuthenticationRoutes.post("/handleUserSignin", handleUserSigninController);
 
 export default AuthenticationRoutes;

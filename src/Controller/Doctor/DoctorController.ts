@@ -12,79 +12,6 @@ import {
   getPastReportPDFModel,
 } from "../../Models/Doctor/DoctorModel";
 
-const addEmployeeController = async (req, res) => {
-  try {
-    const {
-      refRoleId,
-      refHospitalId,
-      refHigherMapping,
-      refUserFname,
-      refUserLname,
-      refDOB,
-      refGender,
-      refMaritalStatus,
-      refEducation,
-      refUserMobileno,
-      refUserEmail,
-      refAddress,
-      refPincode,
-      refUserPassword,
-      refAllopathic,
-      refSuperSpec,
-      refBranchSuperSpec,
-      refAddDeg,
-      refTypeAddDeg,
-      refSpecBranch,
-      refRegCouncil,
-      refNameRegCouncil,
-      refMCINo,
-      refCROcpSector,
-      refCRInstituteType,
-      refCRInstituteName,
-      refCRDesignation,
-      refCRDepartment,
-      refCRAddress,
-      refExperience,
-    } = req.borefUserMobilenody;
-
-    const values = [
-      refRoleId,
-      refHospitalId,
-      refHigherMapping,
-      refUserFname,
-      refUserLname,
-      refDOB,
-      refGender,
-      refMaritalStatus,
-      refEducation,
-      refUserMobileno,
-      refUserEmail,
-      refAddress,
-      refPincode,
-      refUserPassword,
-      refAllopathic,
-      refSuperSpec,
-      refBranchSuperSpec,
-      refAddDeg,
-      refTypeAddDeg,
-      refSpecBranch,
-      refRegCouncil,
-      refNameRegCouncil,
-      refMCINo,
-      refCROcpSector,
-      refCRInstituteType,
-      refCRInstituteName,
-      refCRDesignation,
-      refCRDepartment,
-      refCRAddress,
-      refExperience,
-    ];
-  } catch (error) {
-    console.error("Something went Wrong", error);
-    return res.status(500).json({ error: "Something went Wrong" });
-  }
-};
-
 const checkPatientMapController = async (req, res) => {
   try {
     const { patientId, employeeId, hospitalId } = req.body;
@@ -99,6 +26,9 @@ const checkPatientMapController = async (req, res) => {
 
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
+    logger.error(
+      `Check Paitnet Map (checkPatientMapController) Error: (${error})`
+    );
     console.error("Something went Wrong");
     return res.status(500).json({ error: "Something went Wrong" });
   }
@@ -115,8 +45,10 @@ const addPatientMapController = async (req, res) => {
     }
 
     const result = await addPatientMapModel(doctorId, patientId, hospitalId);
+    logger.info(`Add Patient (${patientId}) Map for (${doctorId})`);
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
+    logger.error(`Add Patient (addPatientMapController) Error: (${error})`);
     console.error("Something went Wrong");
     return res.status(500).json({ error: "Something went Wrong" });
   }
@@ -140,6 +72,9 @@ const getCurrentReportDataController = async (req, res) => {
 
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
+    logger.error(
+      `Get Current Report (getCurrentReportDataController) Error: (${error})`
+    );
     console.error("Something went Wrong");
     return res.status(500).json({ error: "Something went Wrong" + error });
   }
@@ -189,11 +124,13 @@ const getPastReportDataController = async (req, res) => {
 
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
+    logger.error(
+      `Get Past Report (getPastReportDataController) Error: (${error})`
+    );
     console.error("Something went Wrong");
     return res.status(500).json({ error: "Something went Wrong" + error });
   }
 };
-
 
 const getReportPDFController = async (req, res) => {
   try {
@@ -224,6 +161,7 @@ const getReportPDFController = async (req, res) => {
     //   return res.status(200).json(encrypt(result, true));
     // }
   } catch (error) {
+    logger.error(`Get Report PDF (getReportPDFController) Error: (${error})`);
     console.error("Something went Wrong");
     return res.status(500).json({ error: "Something went Wrong" });
   }

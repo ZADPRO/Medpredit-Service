@@ -243,6 +243,7 @@ FROM
 WHERE
   ram."refAssId" = $1
   AND rdm."refHospitalId" = $2
+  AND u."activeStatus" = 'active'
 `;
 
 export const getResetScoreRefQuery = `
