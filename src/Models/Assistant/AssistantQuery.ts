@@ -243,6 +243,7 @@ FROM
 WHERE
   ram."refAssId" = $1
   AND rdm."refHospitalId" = $2
+  AND u."activeStatus" = 'active'
 `;
 
 export const getResetScoreRefQuery = `
@@ -449,10 +450,12 @@ LIMIT
   `;
 
 export const getProfileQueryUsers = `
-  SELECT
+SELECT
   u."refUserFname" || ' ' || u."refUserLname" AS "refUserName",
   u."refUserCustId",
-  rc."refDistrict" AS "refHospitalName"
+  rc."refDistrict" AS "refHospitalName",
+  rc."refUserMobileno",
+  u."refUserId"
 FROM
   public."Users" u
   JOIN public."refCommunication" rc ON rc."refUserId" = u."refUserId"

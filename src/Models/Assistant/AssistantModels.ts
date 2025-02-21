@@ -980,7 +980,7 @@ export const postFamilyUserModel = async (values: any) => {
 
     const newUservaluesInsert = [
       getOverallId.rows[0].overAllId,
-      "MED" + patientId,
+      values.branch === "commercial" ? "USER" + patientId : "MED" + patientId,
       "3",
       values.refUserFname,
       values.refUserLname,

@@ -14,7 +14,9 @@ import {
   addStaffUserQuery,
   getAssistantList,
   getDoctorList,
+  getDoctorListActive,
   getDoctorMapList,
+  getUserActiveStatus,
   getUsersListMobileNo,
   nextDoctorId,
   nextStaffId,
@@ -277,13 +279,19 @@ export const getUserListModel = async (roleId, hospitalId) => {
   try {
     let getUserList;
 
+    console.log("====================================");
+    console.log(roleId);
+    console.log("====================================");
+
     if (roleId === "1") {
-      getUserList = await connection.query(getDoctorList, [hospitalId]);
+      getUserList = await connection.query(getDoctorListActive, [hospitalId]);
     } else if (roleId === "2") {
       getUserList = await connection.query(getAssistantList, [
         roleId,
         hospitalId,
       ]);
+    } else if (roleId === "3") {
+      getUserList = await connection.query(getDoctorList, [hospitalId]);
     }
 
     return {
@@ -466,9 +474,16 @@ export const getDoctorMapListModels = async (
       hospitalId,
     ]);
 
+    const userStatus = await connection.query(getUserActiveStatus, [
+      assistantId,
+    ]);
+
+    console.log(userStatus.rows[0].activeStatus);
+
     return {
       status: true,
       doctorMapList: result.rows,
+      userStatus: userStatus.rows[0].activeStatus,
     };
   } catch (error) {
     console.error("Something went Wrong", error);
