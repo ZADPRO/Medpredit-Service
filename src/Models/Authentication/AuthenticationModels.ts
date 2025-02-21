@@ -477,11 +477,13 @@ export const getDoctorMapListModels = async (
     const userStatus = await connection.query(getUserActiveStatus, [
       assistantId,
     ]);
-    
+
+    console.log(userStatus.rows[0].activeStatus);
+
     return {
       status: true,
       doctorMapList: result.rows,
-      userStatus: userStatus.rows[0].activeStatus,
+      userStatus: userStatus.rows[0] ? userStatus.rows[0].activeStatus : "noStatus",
     };
   } catch (error) {
     console.error("Something went Wrong", error);
