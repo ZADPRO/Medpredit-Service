@@ -477,9 +477,7 @@ export const getDoctorMapListModels = async (
     const userStatus = await connection.query(getUserActiveStatus, [
       assistantId,
     ]);
-
-    console.log(userStatus.rows[0].activeStatus);
-
+    
     return {
       status: true,
       doctorMapList: result.rows,
