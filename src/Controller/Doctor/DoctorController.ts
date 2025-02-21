@@ -1,6 +1,7 @@
 import { encrypt } from "../../Helper/Encryption";
 const bcrypt = require("bcrypt");
 const { CurrentTime } = require("../../Helper/CurrentTime");
+const logger = require("../../Helper/Logger");
 
 import {
   checkPatientMapModel,

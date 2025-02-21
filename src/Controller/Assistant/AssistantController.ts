@@ -127,6 +127,7 @@ const postFamilyUserController = async (req, res) => {
     } = req.body;
 
     const doctorId = req.userData.userid;
+    const branch = req.userData.branch ? req.userData.branch : "";
 
     const values = {
       refUserId,
@@ -144,6 +145,7 @@ const postFamilyUserController = async (req, res) => {
       refUserMobileno,
       refGender,
       doctorId,
+      branch,
     };
 
     const result = await postFamilyUserModel(values);
