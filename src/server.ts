@@ -9,13 +9,16 @@ const cors = require("cors");
 
 const app = express();
 
-app.use(express.json());
+// app.use(express.json());
+app.use(express.json({ limit: "100mb" })); // Increase limit if needed
+app.use(express.urlencoded({ limit: "100mb", extended: true }));
 
 app.use(
   cors({
     origin: "*",
   })
 );
+
 
 app.use("/api/v1", AuthenticationRoutes);
 app.use("/api/v1", AssistantRoutes);

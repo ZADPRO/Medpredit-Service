@@ -23,6 +23,7 @@ const {
   getQuestionScoreController,
   getInvestigationDetailsController,
   deleteInvestigationDetailController,
+  sendReportMailController
 } = require("../../Controller/Assistant/AssistantController");
 
 const AssistantRoutes = express.Router();
@@ -96,5 +97,7 @@ AssistantRoutes.post(
 );
 
 AssistantRoutes.post("/postNewSignup", postNewPatientController);
+
+AssistantRoutes.post("/sendReportMail", sendReportMailController);
 
 export default AssistantRoutes;

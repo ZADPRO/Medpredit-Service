@@ -21,7 +21,9 @@ import {
   getQuestionScoreModel,
   getInvestigationDetailsModel,
   deleteInvestigationDetailModel,
+  sendReportMailModel,
 } from "../../Models/Assistant/AssistantModels";
+import { createReportModel } from "../../Models/Doctor/DoctorModel";
 
 const { CurrentTime } = require("../../Helper/CurrentTime");
 
@@ -267,6 +269,8 @@ const postAnswersController = async (req, res) => {
       hospitalId
     );
 
+    await createReportModel(patientId, doctorId, hospitalId, createdBy);
+
     logger.info(`User (${patientId}) Answered (${categoryId})`);
 
     return res.status(200).json(encrypt(result, true));
@@ -461,6 +465,29 @@ const deleteInvestigationDetailController = async (req, res) => {
   }
 };
 
+const sendReportMailController = async (req, res) => {
+  try {
+    const { email, pdfBase64, filename } = req.body;
+
+    // Validate request body
+    if (!email || !pdfBase64 || !filename) {
+      return res.status(400).json({ error: "Missing required parameters" });
+    }
+
+    // Send Email
+    const result: any = await sendReportMailModel(email, pdfBase64, filename);
+
+    if (result.status) {
+      return res.status(200).json(encrypt(result, true));
+    } else {
+      return res.status(200).json(encrypt(result, true));
+    }
+  } catch (error) {
+    console.error("❌ Mail Send (sendReportMailController) Error:", error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 module.exports = {
   getPatientDataController,
   postNewPatientController,
@@ -480,4 +507,5 @@ module.exports = {
   getQuestionScoreController,
   getInvestigationDetailsController,
   deleteInvestigationDetailController,
+  sendReportMailController,
 };

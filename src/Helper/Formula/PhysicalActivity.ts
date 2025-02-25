@@ -56,7 +56,7 @@ export const PhysicalAactivity = (answers: any) => {
       reclaining = answers[i].answer;
 
       const totalhours = parseFloat(hrs) + (parseFloat(mins) / 60);
-      console.log("------------->",answers[i].answer);
+      // console.log("------------->",answers[i].answer);
 
       if (totalhours > 8) {
         PhysicalActivityScore = "Risk";
