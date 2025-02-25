@@ -483,6 +483,9 @@ const sendReportMailController = async (req, res) => {
       return res.status(200).json(encrypt(result, true));
     }
   } catch (error) {
+    logger.error(
+      `Mail Send (sendReportMailController) Error: (${error})`
+    );
     console.error("❌ Mail Send (sendReportMailController) Error:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }

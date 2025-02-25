@@ -482,7 +482,6 @@ export const getDoctorMapListModels = async (
 
     return {
       status: true,
-      message: "Testing Message",
       doctorMapList: result.rows,
       userStatus: userStatus.rows[0]
         ? userStatus.rows[0].activeStatus
