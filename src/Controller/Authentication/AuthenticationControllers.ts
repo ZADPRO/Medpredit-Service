@@ -1,5 +1,6 @@
 import {
   addAssistantMapModels,
+  ChangeMobileNumberModel,
   changePasswordModel,
   getDoctorMapListModels,
   getUserListModel,
@@ -98,6 +99,29 @@ const changePasswordController = async (req, res) => {
     return res.status(200).json(encrypt(result, true));
   } catch (error) {
     logger.error(`Password change Error: (${error})`);
+    console.error("Something went Wrong");
+    return res.status(500).json({ error: "Something went Wrong " });
+  }
+};
+
+const changeMobileNumberController = async (req, res) => {
+  try {
+    const { oldMobileno, newMobileno, password, roleId } = req.body;
+
+    const result = await ChangeMobileNumberModel(
+      req.userData.userid,
+      newMobileno,
+      password,
+      roleId
+    );
+
+    logger.info(`Mobile Number change for refUserId: (${req.userData.userid})`);
+
+    // return res.status(200).json(encrypt(result, true));
+  } catch (error) {
+    logger.error(
+      `Mobile Number change (changeMobileNumberController) Error: (${error})`
+    );
     console.error("Something went Wrong");
     return res.status(500).json({ error: "Something went Wrong " });
   }
@@ -286,4 +310,5 @@ module.exports = {
   addAssistantMapController,
   postActiveStatusController,
   handleUserSigninController,
+  changeMobileNumberController,
 };

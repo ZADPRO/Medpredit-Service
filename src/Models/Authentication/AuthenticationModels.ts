@@ -13,6 +13,7 @@ import {
   addStaffExprienceQuery,
   addStaffUserQuery,
   getAssistantList,
+  getDetailsQuery,
   getDoctorList,
   getDoctorListActive,
   getDoctorMapList,
@@ -21,6 +22,7 @@ import {
   nextDoctorId,
   nextStaffId,
   postActiveQuery,
+  updateMobilenumberQuery,
   userParticularSiginQuery,
 } from "./AuthenticationQuery";
 
@@ -262,6 +264,63 @@ export const changePasswordModel = async (
         return {
           status: false,
           message: "Invalid Current Password",
+        };
+      }
+    }
+  } catch (error) {
+    console.error("Something went Wrong", error);
+    throw error;
+  } finally {
+    await connection.end();
+  }
+};
+
+export const ChangeMobileNumberModel = async (
+  userid: any,
+  newMobileno: any,
+  password: any,
+  roleId: any
+) => {
+  const connection = await DB();
+  try {
+    const getDetails = await connection.query(getDetailsQuery, [userid]);
+
+    if (getDetails.rows.length > 0) {
+      const hashpass = getDetails.rows[0].refUserHashedpass;
+
+      const passStatus = await bcrypt.compare(password, hashpass);
+
+      if (passStatus) {
+        const result = await connection.query(usersigninQuery, [newMobileno]);
+
+        if (result.rows.length === 0) {
+          if (roleId === "3") {
+            result.rows.forEach(async (element) => {
+              await connection.query(updateMobilenumberQuery, [
+                newMobileno,
+                element.refUserId,
+              ]);
+            });
+          } else {
+            await connection.query(updateMobilenumberQuery, [
+              newMobileno,
+              userid,
+            ]);
+
+            return {
+              status: true,
+            };
+          }
+        } else {
+          return {
+            status: false,
+            message: "Mobile Number Already Taken",
+          };
+        }
+      } else {
+        return {
+          status: false,
+          message: "Invalid Password",
         };
       }
     }

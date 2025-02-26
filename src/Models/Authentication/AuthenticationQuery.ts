@@ -173,6 +173,15 @@ WHERE
   "refUserId" = $3;
 `;
 
+export const updateMobilenumberQuery = `
+UPDATE
+  public."refCommunication" rc
+SET
+  rc."refUserMobileno" = $1
+WHERE
+  rc."refUserId" = $2
+`;
+
 export const getDoctorList = `
 SELECT DISTINCT
   ON (u."refUserId") rdm."refDMId" AS "code",
@@ -418,6 +427,17 @@ SELECT
   u."activeStatus"
 FROM
   public."Users" u
+WHERE
+  u."refUserId" = $1
+`;
+
+export const getDetailsQuery = `
+SELECT
+  *
+FROM
+  public."Users" u
+  JOIN public."refCommunication" rc ON rc."refUserId" = u."refUserId"
+  JOIN public."refUserDomain" rud ON rud."refUserId" = u."refUserId"
 WHERE
   u."refUserId" = $1
 `;

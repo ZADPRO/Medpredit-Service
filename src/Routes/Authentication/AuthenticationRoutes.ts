@@ -11,6 +11,7 @@ const {
   addAssistantMapController,
   postActiveStatusController,
   handleUserSigninController,
+  changeMobileNumberController
 } = require("../../Controller/Authentication/AuthenticationControllers");
 
 const AuthenticationRoutes = express.Router();
@@ -28,6 +29,13 @@ AuthenticationRoutes.post(
   verifyToken,
   changePasswordController
 );
+
+AuthenticationRoutes.post(
+  "/changeMobilenumber",
+  verifyToken,
+  changeMobileNumberController
+);
+
 
 AuthenticationRoutes.post("/getUserList", verifyToken, getUserListController);
 
