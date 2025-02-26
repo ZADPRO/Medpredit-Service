@@ -63,7 +63,7 @@ const postNewPatientController = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(refUserPassword, salt);
 
-    const HigherUser = req.userData.userid ? req.userData.userid : "self";
+    const HigherUser = req.userData ? req.userData.userid : "self";
     const hospitalId = req.userData ? req.userData.hospitalid : "self";
 
     const createdBy = req.userData ? req.userData.userid : "self";
