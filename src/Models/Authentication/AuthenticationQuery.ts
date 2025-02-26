@@ -175,11 +175,13 @@ WHERE
 
 export const updateMobilenumberQuery = `
 UPDATE
-  public."refCommunication" rc
+  public."refCommunication"
 SET
-  rc."refUserMobileno" = $1
+  "refUserMobileno" = $1,
+  "updatedAt" = $2,
+  "updatedBy" = $3
 WHERE
-  rc."refUserId" = $2
+  "refUserId" = $4
 `;
 
 export const getDoctorList = `

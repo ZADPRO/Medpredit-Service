@@ -1,3 +1,4 @@
+import { getDateOnly } from "../../Helper/CurrentTime";
 import {
   checkMobileNumberQuery,
   getUserId,
@@ -283,6 +284,7 @@ export const ChangeMobileNumberModel = async (
 ) => {
   const connection = await DB();
   try {
+    const createdAt = getDateOnly();
     const getDetails = await connection.query(getDetailsQuery, [userid]);
 
     if (getDetails.rows.length > 0) {
@@ -294,16 +296,32 @@ export const ChangeMobileNumberModel = async (
         const result = await connection.query(usersigninQuery, [newMobileno]);
 
         if (result.rows.length === 0) {
-          if (roleId === "3") {
-            result.rows.forEach(async (element) => {
-              await connection.query(updateMobilenumberQuery, [
-                newMobileno,
-                element.refUserId,
-              ]);
-            });
+          console.log(roleId);
+
+          if (roleId === 3) {
+            const mobileList = await connection.query(usersigninQuery, [
+              getDetails.rows[0].refUserMobileno,
+            ]);
+
+            await Promise.all(
+              mobileList.rows.map((element) =>
+                connection.query(updateMobilenumberQuery, [
+                  newMobileno,
+                  createdAt,
+                  userid,
+                  element.refUserId,
+                ])
+              )
+            );
+
+            return {
+              status: true,
+            };
           } else {
             await connection.query(updateMobilenumberQuery, [
               newMobileno,
+              createdAt,
+              userid,
               userid,
             ]);
 

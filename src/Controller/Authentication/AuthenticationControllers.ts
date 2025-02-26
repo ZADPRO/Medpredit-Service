@@ -106,7 +106,11 @@ const changePasswordController = async (req, res) => {
 
 const changeMobileNumberController = async (req, res) => {
   try {
-    const { oldMobileno, newMobileno, password, roleId } = req.body;
+    const { newMobileno, password, roleId } = req.body;
+
+
+    console.log(newMobileno, password, roleId);
+    
 
     const result = await ChangeMobileNumberModel(
       req.userData.userid,
@@ -117,7 +121,7 @@ const changeMobileNumberController = async (req, res) => {
 
     logger.info(`Mobile Number change for refUserId: (${req.userData.userid})`);
 
-    // return res.status(200).json(encrypt(result, true));
+    return res.status(200).json(encrypt(result, true));
   } catch (error) {
     logger.error(
       `Mobile Number change (changeMobileNumberController) Error: (${error})`
