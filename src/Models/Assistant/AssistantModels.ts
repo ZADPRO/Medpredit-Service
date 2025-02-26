@@ -35,7 +35,7 @@ import nodemailer from "nodemailer";
 
 /**
  * Sends a PDF report via email using Nodemailer.
- * 
+ *
  * @param {string} mailId - Recipient email address.
  * @param {string} pdfBase64 - Base64 encoded PDF file.
  * @param {string} filename - Name of the attached PDF file.
@@ -451,7 +451,7 @@ export const postAnswersModels = async (
     ]);
 
     // console.log("+++++++++++++++++", map.rows[0].refPMId);
-    const mapId = hospitalId ? map.rows[0].refPMId : patientId;
+    const mapId = hospitalId !== "undefined" ? map.rows[0].refPMId : patientId;
 
     // console.log("---------->", patientId);
 
@@ -917,7 +917,7 @@ export const postAnswersModels = async (
       score.map(async (element, index) => {
         console.log(lastestPTId + index, element, multiCategoryId[index]);
 
-        if (hospitalId) {
+        if (hospitalId !== "undefined") {
           await connection.query(addPatientTransactionQuery, [
             lastestPTId + index,
             mapId,
