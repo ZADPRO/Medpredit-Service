@@ -56,7 +56,7 @@ FROM
   JOIN public."refHospital" rh ON rh."refHospitalId" = CAST(rdm."refHospitalId" AS INTEGER)
   JOIN public."Users" u ON u."refUserId" = CAST(rdm."refDoctorId" AS INTEGER)
 WHERE
-  rpm."refPMId" = $1
+u."refUserId" = $1
   `;
 
 export const getPatientDetail = `

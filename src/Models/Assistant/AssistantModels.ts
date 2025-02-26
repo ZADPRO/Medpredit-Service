@@ -1,4 +1,3 @@
-import { calculateDaysDifference } from "../../Helper/CurrentTime";
 import { Alcohol } from "../../Helper/Formula/Alcohol";
 import { BMI } from "../../Helper/Formula/BMI";
 import { Dietary } from "../../Helper/Formula/Dietary";
@@ -30,6 +29,18 @@ import {
 } from "./AssistantQuery";
 import { SingleSelectValues } from "../../Helper/Formula/Investigation/SingleSelectValue";
 import { USGAbdmen } from "../../Helper/Formula/Investigation/USGAbdmen";
+import { createReportModel } from "../Doctor/DoctorModel";
+
+import nodemailer from "nodemailer";
+
+/**
+ * Sends a PDF report via email using Nodemailer.
+ *
+ * @param {string} mailId - Recipient email address.
+ * @param {string} pdfBase64 - Base64 encoded PDF file.
+ * @param {string} filename - Name of the attached PDF file.
+ * @returns {Promise<{status: boolean, message?: string}>}
+ * */
 
 const DB = require("../../Helper/DBConncetion");
 
@@ -222,10 +233,10 @@ export const getSubMainCategoryModels = async (
     let resultArray = [];
 
     for (const element of result.rows) {
-      console.log(element);
+      // console.log(element);
 
       if (element.refQCategoryId === 94 || element.refQCategoryId === 6) {
-        console.log("+++++++++");
+        // console.log("+++++++++");
 
         const score = await connection.query(getUserScore, [
           patientId,
@@ -440,7 +451,7 @@ export const postAnswersModels = async (
     ]);
 
     // console.log("+++++++++++++++++", map.rows[0].refPMId);
-    const mapId = hospitalId ? map.rows[0].refPMId : patientId;
+    const mapId = hospitalId !== "undefined" ? map.rows[0].refPMId : patientId;
 
     // console.log("---------->", patientId);
 
@@ -865,8 +876,6 @@ export const postAnswersModels = async (
     } else if (categoryId === "224") {
       let result: any = USGAbdmen(answers, mappedResult);
 
-      console.log(result);
-
       result.investigationDataCategory.forEach((cat, index) => {
         if (result.investigationData[index].answer.length > 0) {
           insertInvestigationPreviousValues(
@@ -908,7 +917,7 @@ export const postAnswersModels = async (
       score.map(async (element, index) => {
         console.log(lastestPTId + index, element, multiCategoryId[index]);
 
-        if (hospitalId) {
+        if (hospitalId !== "undefined") {
           await connection.query(addPatientTransactionQuery, [
             lastestPTId + index,
             mapId,
@@ -1688,5 +1697,54 @@ export const deleteInvestigationDetailModel = async (investigationId: any) => {
     throw error;
   } finally {
     await connection.end();
+  }
+};
+
+export const sendReportMailModel = async (
+  mailId: string,
+  pdfBase64: string,
+  filename: string
+): Promise<{ status: boolean; message?: string }> => {
+  try {
+    // Validate input
+    if (!mailId || !pdfBase64 || !filename) {
+      return { status: false, message: "Missing required parameters" };
+    }
+
+    // Convert Base64 to Buffer
+    const pdfBuffer = Buffer.from(pdfBase64, "base64");
+
+    // Setup Nodemailer transporter
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    // Email options
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: mailId,
+      subject: "Your PDF Report",
+      text: "Please find your PDF report attached.",
+      attachments: [
+        {
+          filename: filename,
+          content: pdfBuffer,
+          contentType: "application/pdf",
+        },
+      ],
+    };
+
+    // Send Email
+    await transporter.sendMail(mailOptions);
+    console.log(`📩 Email sent successfully to ${mailId}`);
+
+    return { status: true };
+  } catch (error) {
+    console.error("❌ Error sending email:", error);
+    return { status: false, message: "Failed to send email" };
   }
 };

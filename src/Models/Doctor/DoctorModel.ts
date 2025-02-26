@@ -1,4 +1,3 @@
-import { log } from "console";
 import { calculateAge, getDateOnly } from "../../Helper/CurrentTime";
 import { Diabetes } from "../../Helper/Formula/Diagnosis/Diabetes";
 import {
@@ -333,109 +332,160 @@ export const createReportModel = async (
       patientId,
     ]);
 
-    const treatmentDetails = await connection.query(
-      getDiagnosisTreatmentQuery,
-      [refPTcreatedDate, patientId, "Anti-diabetic"]
-    );
+    const values = ["103", "203", "204", "202", "207", "90", "91"];
 
-    const diabetesResult = Diabetes(
-      scoreResult.rows,
-      treatmentDetails.rows[0].treatementdetails
-    );
+    let Status = false;
 
-    // Hypertension Diagnosis
-    const hypertensiontreatmentDetails = await connection.query(
-      getDiagnosisTreatmentQuery,
-      [refPTcreatedDate, patientId, "Anti-hypertensive"]
-    );
+    values.map((element) => {
+      const foundItem = scoreResult.rows.find(
+        (item) => item.refQCategoryId === element
+      );
 
-    const ageQuery = await connection.query(getPatientDetail, [patientId]);
+      console.log("====================================");
+      console.log(
+        foundItem
+          ? getValidateDuration(element) +
+              " " +
+              -calculateDaysDifference(
+                foundItem.refPTcreatedDate,
+                refPTcreatedDate
+              ) +
+              " " +
+              element
+          : "null"
+      );
+      console.log("====================================");
 
-    const age = calculateAge(ageQuery.rows[0].refDOB);
+      if (
+        foundItem &&
+        getValidateDuration(element) >
+          -calculateDaysDifference(foundItem.refPTcreatedDate, refPTcreatedDate)
+      ) {
+        Status = true;
+      } else {
+        Status = false;
+      }
+    });
 
-    const hypertensionResult = Hypertension(
-      scoreResult.rows,
-      hypertensiontreatmentDetails.rows[0].treatementdetails,
-      treatmentDetails.rows[0].treatementdetails,
-      age
-    );
+    console.log("--->1", Status);
 
-    console.log(diabetesResult, hypertensionResult);
+    if (Status) {
+      const treatmentDetails = await connection.query(
+        getDiagnosisTreatmentQuery,
+        [refPTcreatedDate, patientId, "Anti-diabetic"]
+      );
 
-    let score = [diabetesResult, hypertensionResult];
-    let multiCategoryId = ["237", "238"];
+      const diabetesResult = Diabetes(
+        scoreResult.rows,
+        treatmentDetails.rows[0].treatementdetails
+      );
 
-    const createdAt = CurrentTime();
+      // Hypertension Diagnosis
+      const hypertensiontreatmentDetails = await connection.query(
+        getDiagnosisTreatmentQuery,
+        [refPTcreatedDate, patientId, "Anti-hypertensive"]
+      );
 
-    const map = await connection.query(checkPatientMapQuery, [
-      doctorId,
-      patientId,
-      hospitalId,
-    ]);
+      if (hypertensiontreatmentDetails.rows.length > 0) {
+        Status = true;
+      } else {
+        Status = false;
+      }
 
-    const mapId = map.rows[0].refPMId;
+      if (Status) {
+        const ageQuery = await connection.query(getPatientDetail, [patientId]);
 
-    const getlatestPTId = await connection.query(getLatestPTIdQuery);
+        const age = calculateAge(ageQuery.rows[0].refDOB);
 
-    let lastestPTId = 1;
+        const hypertensionResult = Hypertension(
+          scoreResult.rows,
+          hypertensiontreatmentDetails.rows[0].treatementdetails,
+          treatmentDetails.rows[0].treatementdetails,
+          age
+        );
 
-    if (getlatestPTId.rows.length > 0) {
-      lastestPTId = parseInt(getlatestPTId.rows[0].refPTId) + 1;
-    }
+        console.log(diabetesResult, hypertensionResult);
 
-    let latestval = lastestPTId;
+        let score = [diabetesResult, hypertensionResult];
+        let multiCategoryId = ["237", "238"];
 
-    await Promise.all(
-      score.map(async (element, index) => {
-        console.log(lastestPTId + index, element, multiCategoryId[index]);
+        const createdAt = CurrentTime();
+
+        const map = await connection.query(checkPatientMapQuery, [
+          doctorId,
+          patientId,
+          hospitalId,
+        ]);
+
+        const mapId = map.rows[0].refPMId;
+
+        const getlatestPTId = await connection.query(getLatestPTIdQuery);
+
+        let lastestPTId = 1;
+
+        if (getlatestPTId.rows.length > 0) {
+          lastestPTId = parseInt(getlatestPTId.rows[0].refPTId) + 1;
+        }
+
+        let latestval = lastestPTId;
+
+        await Promise.all(
+          score.map(async (element, index) => {
+            console.log(lastestPTId + index, element, multiCategoryId[index]);
+
+            await connection.query(addPatientTransactionQuery, [
+              lastestPTId + index,
+              mapId,
+              element,
+              "1",
+              refPTcreatedDate,
+              createdAt,
+              employee,
+            ]);
+
+            await connection.query(addUserScoreDetailsQuery, [
+              lastestPTId + index,
+              multiCategoryId[index],
+              createdAt,
+              employee,
+            ]);
+
+            latestval += 1;
+          })
+        );
+
+        const patientMapId = await connection.query(getDoctorPatientMapQuery, [
+          patientId,
+          doctorId,
+          hospitalId,
+        ]);
+
+        const PTcreatedDate = getDateOnly();
+
+        const createdBy = employee;
 
         await connection.query(addPatientTransactionQuery, [
-          lastestPTId + index,
-          mapId,
-          element,
+          latestval,
+          patientMapId.rows[0].refPMId,
+          "0",
           "1",
-          refPTcreatedDate,
+          PTcreatedDate,
           createdAt,
-          employee,
+          createdBy,
         ]);
 
         await connection.query(addUserScoreDetailsQuery, [
-          lastestPTId + index,
-          multiCategoryId[index],
+          latestval,
+          "0",
           createdAt,
-          employee,
+          createdBy,
         ]);
+      }
+    }
 
-        latestval += 1;
-      })
-    );
-
-    const patientMapId = await connection.query(getDoctorPatientMapQuery, [
-      patientId,
-      doctorId,
-      hospitalId,
-    ]);
-
-    const PTcreatedDate = getDateOnly();
-
-    const createdBy = employee;
-
-    await connection.query(addPatientTransactionQuery, [
-      latestval,
-      patientMapId.rows[0].refPMId,
-      "0",
-      "1",
-      PTcreatedDate,
-      createdAt,
-      createdBy,
-    ]);
-
-    await connection.query(addUserScoreDetailsQuery, [
-      latestval,
-      "0",
-      createdAt,
-      createdBy,
-    ]);
+    console.log("====================================");
+    console.log(Status);
+    console.log("====================================");
 
     return {
       status: true,
@@ -679,6 +729,12 @@ const getValidateDuration = (questionId: any) => {
       return 14;
     case 51:
       return 14;
+    case 90:
+      return 1;
+    case 91:
+      return 1;
+    case 103:
+      return 1;
     case 202:
       return 1;
     case 203:

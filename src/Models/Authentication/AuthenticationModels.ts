@@ -1,3 +1,4 @@
+import { getDateOnly } from "../../Helper/CurrentTime";
 import {
   checkMobileNumberQuery,
   getUserId,
@@ -13,6 +14,7 @@ import {
   addStaffExprienceQuery,
   addStaffUserQuery,
   getAssistantList,
+  getDetailsQuery,
   getDoctorList,
   getDoctorListActive,
   getDoctorMapList,
@@ -21,6 +23,7 @@ import {
   nextDoctorId,
   nextStaffId,
   postActiveQuery,
+  updateMobilenumberQuery,
   userParticularSiginQuery,
 } from "./AuthenticationQuery";
 
@@ -273,6 +276,80 @@ export const changePasswordModel = async (
   }
 };
 
+export const ChangeMobileNumberModel = async (
+  userid: any,
+  newMobileno: any,
+  password: any,
+  roleId: any
+) => {
+  const connection = await DB();
+  try {
+    const createdAt = getDateOnly();
+    const getDetails = await connection.query(getDetailsQuery, [userid]);
+
+    if (getDetails.rows.length > 0) {
+      const hashpass = getDetails.rows[0].refUserHashedpass;
+
+      const passStatus = await bcrypt.compare(password, hashpass);
+
+      if (passStatus) {
+        const result = await connection.query(usersigninQuery, [newMobileno]);
+
+        if (result.rows.length === 0) {
+          console.log(roleId);
+
+          if (roleId === 3) {
+            const mobileList = await connection.query(usersigninQuery, [
+              getDetails.rows[0].refUserMobileno,
+            ]);
+
+            await Promise.all(
+              mobileList.rows.map((element) =>
+                connection.query(updateMobilenumberQuery, [
+                  newMobileno,
+                  createdAt,
+                  userid,
+                  element.refUserId,
+                ])
+              )
+            );
+
+            return {
+              status: true,
+            };
+          } else {
+            await connection.query(updateMobilenumberQuery, [
+              newMobileno,
+              createdAt,
+              userid,
+              userid,
+            ]);
+
+            return {
+              status: true,
+            };
+          }
+        } else {
+          return {
+            status: false,
+            message: "Mobile Number Already Taken",
+          };
+        }
+      } else {
+        return {
+          status: false,
+          message: "Invalid Password",
+        };
+      }
+    }
+  } catch (error) {
+    console.error("Something went Wrong", error);
+    throw error;
+  } finally {
+    await connection.end();
+  }
+};
+
 export const getUserListModel = async (roleId, hospitalId) => {
   const connection = await DB();
 
@@ -483,7 +560,9 @@ export const getDoctorMapListModels = async (
     return {
       status: true,
       doctorMapList: result.rows,
-      userStatus: userStatus.rows[0].activeStatus,
+      userStatus: userStatus.rows[0]
+        ? userStatus.rows[0].activeStatus
+        : "noStatus",
     };
   } catch (error) {
     console.error("Something went Wrong", error);
