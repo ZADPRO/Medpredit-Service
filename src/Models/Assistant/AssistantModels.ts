@@ -234,8 +234,14 @@ export const getSubMainCategoryModels = async (
 
     for (const element of result.rows) {
       // console.log(element);
+      console.log(element.refQCategoryId, element.refCategoryLabel);
 
-      if (element.refQCategoryId === 94 || element.refQCategoryId === 6) {
+      if (
+        element.refQCategoryId === 94 ||
+        element.refQCategoryId === 6 ||
+        element.refQCategoryId === 5 ||
+        element.refQCategoryId === 201
+      ) {
         // console.log("+++++++++");
 
         const score = await connection.query(getUserScore, [
