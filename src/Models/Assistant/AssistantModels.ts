@@ -435,10 +435,6 @@ export const postAnswersModels = async (
 
   const PTcreatedDate = getDateOnly();
 
-
-  
-
-
   try {
     await connection.query("BEGIN;");
 
@@ -928,41 +924,36 @@ export const postAnswersModels = async (
     await Promise.all(
       score.map(async (element, index) => {
 
-        
-  logger.info(
-    `id (${lastestPTId+index}) answer (${element}) Category Answer(${multiCategoryId[index]})`
-  );
-
         console.log(lastestPTId + index, element, multiCategoryId[index]);
 
-        // if (hospitalId !== "undefined") {
-        //   await connection.query(addPatientTransactionQuery, [
-        //     lastestPTId + index,
-        //     mapId,
-        //     element,
-        //     "1",
-        //     PTcreatedDate,
-        //     createdAt,
-        //     createdBy,
-        //   ]);
-        // } else {
-        //   await connection.query(addPatientIdTransactionQuery, [
-        //     lastestPTId + index,
-        //     patientId,
-        //     element,
-        //     "1",
-        //     PTcreatedDate,
-        //     createdAt,
-        //     createdBy,
-        //   ]);
-        // }
+        if (hospitalId !== "undefined") {
+          await connection.query(addPatientTransactionQuery, [
+            lastestPTId + index,
+            mapId,
+            element,
+            "1",
+            PTcreatedDate,
+            createdAt,
+            createdBy,
+          ]);
+        } else {
+          await connection.query(addPatientIdTransactionQuery, [
+            lastestPTId + index,
+            patientId,
+            element,
+            "1",
+            PTcreatedDate,
+            createdAt,
+            createdBy,
+          ]);
+        }
 
-        // await connection.query(addUserScoreDetailsQuery, [
-        //   lastestPTId + index,
-        //   multiCategoryId[index],
-        //   createdAt,
-        //   createdBy,
-        // ]);
+        await connection.query(addUserScoreDetailsQuery, [
+          lastestPTId + index,
+          multiCategoryId[index],
+          createdAt,
+          createdBy,
+        ]);
       })
     );
 
