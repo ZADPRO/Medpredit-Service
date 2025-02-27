@@ -1709,11 +1709,12 @@ export const deleteInvestigationDetailModel = async (investigationId: any) => {
 export const sendReportMailModel = async (
   mailId: string,
   pdfBase64: string,
-  filename: string
+  filename: string,
+  name: string
 ): Promise<{ status: boolean; message?: string }> => {
   try {
     // Validate input
-    if (!mailId || !pdfBase64 || !filename) {
+    if (!mailId || !pdfBase64 || !filename || !name) {
       return { status: false, message: "Missing required parameters" };
     }
 
@@ -1733,8 +1734,90 @@ export const sendReportMailModel = async (
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: mailId,
-      subject: "Your PDF Report",
-      text: "Please find your PDF report attached.",
+      subject: name + " HealthCare Report",
+      html: `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Health Report Email</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 3px solid #ffffff;
+        }
+        .header {
+            background-color: #ffffff;
+            padding: 0px 20px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+        .company-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+        }
+        .company-name span {
+            color: #f3dc00;
+        }
+        .header img {
+            max-height: 50px;
+        }
+        .content {
+            padding: 20px;
+            text-align: left;
+            color: #333333;
+        }
+        .signature {
+            text-align: left;
+            font-weight: bold;
+            margin-top: 20px;
+            color: #0478df;
+        }
+        .footer {
+            background-color: #0478df;
+            color: #ffffff;
+            text-align: center;
+            padding: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+
+<img src="https://i.ibb.co/twxfhn82/logo-2.png"  />
+                   </div>
+        <div class="content">
+            <p>Hi <strong>${name}</strong>,</p>
+            <p>Thanks from <strong>ZAdroit</strong>, please find attached your Health report for self-care recommendation.</p>
+            <p class="signature">
+                Thanks & Regards, <br>
+                ZAdroit Team
+            </p>
+        </div>
+        <div class="footer">
+            &copy; 2025 ZAdroit. All rights reserved.
+        </div>
+    </div>
+
+</body>
+</html>`,
       attachments: [
         {
           filename: filename,
@@ -1754,3 +1837,5 @@ export const sendReportMailModel = async (
     return { status: false, message: "Failed to send email" };
   }
 };
+
+const htmlbody = () => {};
