@@ -3,6 +3,12 @@ const logger = require("../../Helper/Logger");
 export const BMI = (answers: any) => {
   answers.sort((a, b) => a.questionId - b.questionId);
 
+  answers.forEach((element) => {
+    logger.info(
+      `answers (${element.answer}), questionId (${element.questionId})`
+    );
+  });
+
   console.log(answers);
 
   const height = parseFloat(answers[0].answer);
