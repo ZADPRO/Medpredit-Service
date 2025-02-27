@@ -467,15 +467,15 @@ const deleteInvestigationDetailController = async (req, res) => {
 
 const sendReportMailController = async (req, res) => {
   try {
-    const { email, pdfBase64, filename } = req.body;
+    const { email, pdfBase64, filename, name } = req.body;
 
     // Validate request body
-    if (!email || !pdfBase64 || !filename) {
+    if (!email || !pdfBase64 || !filename || !name) {
       return res.status(400).json({ error: "Missing required parameters" });
     }
 
     // Send Email
-    const result: any = await sendReportMailModel(email, pdfBase64, filename);
+    const result: any = await sendReportMailModel(email, pdfBase64, filename, name);
 
     if (result.status) {
       return res.status(200).json(encrypt(result, true));
