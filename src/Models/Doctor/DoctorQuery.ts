@@ -259,3 +259,14 @@ WHERE
   rpm."refPatientId" = $1
   AND rtd."refTDCreatedDate"::DATE = CAST($2 AS DATE)
   `;
+
+  export const checkCreateReport = `
+  SELECT
+  *
+FROM
+  public."refUserScoreDetail" rusd
+  FULL JOIN public."refPatientTransaction" rpt ON rpt."refPTId" = rusd."refPTId"::INTEGER
+  WHERE DATE(rpt."refPTcreatedDate") = DATE($1)
+  AND (rpt."refPMId" = $2 OR rpt."refUserId" = $3)
+  AND rusd."refQCategoryId" = '237'
+  `;

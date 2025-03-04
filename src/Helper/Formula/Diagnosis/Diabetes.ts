@@ -43,11 +43,13 @@ export const Diabetes = (scoreResult: any, treatmentDetails: any) => {
     return result;
   }
 
-  if (fbs <= 100 && ppbs <= 140 && rbs <= 110 && hba1c <= 5.7) {
-    if (treatmentDetails) {
-      return "Diabetes Controlled With Medications";
-    } else {
-      return "Diabetes Controlled Without Medications";
+  if (PreviousDiabetics === "Yes") {
+    if (fbs <= 100 && ppbs <= 140 && rbs <= 110 && hba1c <= 5.7) {
+      if (treatmentDetails) {
+        return "Diabetes Controlled With Medications";
+      } else {
+        return "Diabetes Controlled Without Medications";
+      }
     }
   } else if (fbs >= 126 && ppbs >= 200 && rbs >= 200 && hba1c >= 6.5) {
     if (treatmentDetails) {
