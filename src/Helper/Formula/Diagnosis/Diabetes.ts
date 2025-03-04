@@ -35,8 +35,6 @@ export const Diabetes = (scoreResult: any, treatmentDetails: any) => {
     fbs <= 125 &&
     ppbs >= 141 &&
     ppbs <= 199 &&
-    rbs >= 111 &&
-    rbs <= 199 &&
     hba1c >= 5.8 &&
     hba1c <= 6.4 &&
     PreviousDiabetics != "Yes"
