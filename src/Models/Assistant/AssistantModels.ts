@@ -432,7 +432,6 @@ export const postAnswersModels = async (
   const connection = await DB();
   const createdAt = CurrentTime();
 
-
   const PTcreatedDate = getDateOnly();
 
   try {
@@ -923,7 +922,6 @@ export const postAnswersModels = async (
 
     await Promise.all(
       score.map(async (element, index) => {
-
         console.log(lastestPTId + index, element, multiCategoryId[index]);
 
         if (hospitalId !== "undefined") {
