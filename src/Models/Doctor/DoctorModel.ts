@@ -360,27 +360,21 @@ export const createReportModel = async (
         "53",
       ];
 
-      let Status = false;
+      let Status103 = false;
+      let Status203 = false;
+      let Status204 = false;
+      let Status202 = false;
+      let Status207 = false;
+      let Status90 = false;
+      let Status91 = false;
+      let Status52 = false;
+      let Status53 = false;
+      let StatusHyperTreat = false;
 
       values.map((element) => {
         const foundItem = scoreResult.rows.find(
           (item) => item.refQCategoryId === element
         );
-
-        // console.log("====================================");
-        // console.log(
-        //   foundItem
-        //     ? getValidateDuration(element) +
-        //         " " +
-        //         -calculateDaysDifference(
-        //           foundItem.refPTcreatedDate,
-        //           refPTcreatedDate
-        //         ) +
-        //         " " +
-        //         element
-        //     : "null"
-        // );
-        // console.log("====================================");
 
         if (
           foundItem &&
@@ -390,15 +384,61 @@ export const createReportModel = async (
               refPTcreatedDate
             )
         ) {
-          Status = true;
+          if (element === "103") {
+            Status103 = true;
+          } else if (element === "203") {
+            Status203 = true;
+          } else if (element === "204") {
+            Status204 = true;
+          } else if (element === "202") {
+            Status202 = true;
+          } else if (element === "207") {
+            Status207 = true;
+          } else if (element === "90") {
+            Status90 = true;
+          } else if (element === "91") {
+            Status91 = true;
+          } else if (element === "52") {
+            Status52 = true;
+          } else if (element === "53") {
+            Status53 = true;
+          }
+          // Status = true;
         } else {
-          Status = false;
+          if (element === "103") {
+            Status103 = false;
+          } else if (element === "203") {
+            Status203 = false;
+          } else if (element === "204") {
+            Status204 = false;
+          } else if (element === "202") {
+            Status202 = false;
+          } else if (element === "207") {
+            Status207 = false;
+          } else if (element === "90") {
+            Status90 = false;
+          } else if (element === "91") {
+            Status91 = false;
+          } else if (element === "52") {
+            Status52 = false;
+          } else if (element === "53") {
+            Status53 = false;
+          }
+          // Status = false;
         }
       });
 
-      console.log("--->1", Status);
-
-      if (Status) {
+      if (
+        Status103 &&
+        Status203 &&
+        Status204 &&
+        Status202 &&
+        Status207 &&
+        Status90 &&
+        Status91 &&
+        Status52 &&
+        Status53
+      ) {
         const treatmentDetails = await connection.query(
           getDiagnosisTreatmentQuery,
           [refPTcreatedDate, patientId, "Anti-diabetic"]
@@ -416,12 +456,22 @@ export const createReportModel = async (
         );
 
         if (hypertensiontreatmentDetails.rows.length > 0) {
-          Status = true;
+          StatusHyperTreat = true;
         } else {
-          Status = false;
+          StatusHyperTreat = false;
         }
 
-        if (Status) {
+        if (
+          Status103 &&
+          Status203 &&
+          Status204 &&
+          Status202 &&
+          Status207 &&
+          Status90 &&
+          Status91 &&
+          Status52 &&
+          Status53
+        ) {
           const ageQuery = await connection.query(getPatientDetail, [
             patientId,
           ]);
@@ -479,14 +529,17 @@ export const createReportModel = async (
         }
       }
 
-      console.log("====================================");
-      console.log(Status);
-      console.log("====================================");
-    }else{
-      console.log("_+_+_+_+_+_+_+_+_+ Data AlreADY Created")
+      // console.log("====================================");
+      // console.log(Status);
+      // console.log("====================================");
+    } else {
+      console.log("_+_+_+_+_+_+_+_+_+ Data AlreADY Created");
     }
 
-    console.log("############################",checkCreateReportresult.rows.length )
+    console.log(
+      "############################",
+      checkCreateReportresult.rows.length
+    );
 
     return {
       status: true,
@@ -815,6 +868,8 @@ export const getCurrentReportPDFModel = async (
 ) => {
   const connection = await DB();
 
+  const refPTcreatedDate = getDateOnly();
+
   const createdAt = CurrentTime();
 
   console.log("====================================");
@@ -882,13 +937,148 @@ export const getCurrentReportPDFModel = async (
       })
       .join(", ");
 
-    console.log(resultString);
+    let totalScoreResult = scoreResult.rows;
+
+    //Diabetics and Hypertension Calculations
+
+    const AlgorithamscoreResult = await connection.query(getDiagnosisQuery, [
+      refPTcreatedDate,
+      patientId,
+    ]);
+
+    const values = ["103", "203", "204", "202", "207", "90", "91", "52", "53"];
+
+    let Status103 = false;
+    let Status203 = false;
+    let Status204 = false;
+    let Status202 = false;
+    let Status207 = false;
+    let Status90 = false;
+    let Status91 = false;
+    let Status52 = false;
+    let Status53 = false;
+
+    values.map((element) => {
+      const foundItem = AlgorithamscoreResult.rows.find(
+        (item) => item.refQCategoryId === element
+      );
+
+      if (
+        foundItem &&
+        getValidateDuration(element) >
+          -calculateDaysDifference(foundItem.refPTcreatedDate, refPTcreatedDate)
+      ) {
+        console.log("====___>", element, true);
+        if (element === "103") {
+          Status103 = true;
+        } else if (element === "203") {
+          Status203 = true;
+        } else if (element === "204") {
+          Status204 = true;
+        } else if (element === "202") {
+          Status202 = true;
+        } else if (element === "207") {
+          Status207 = true;
+        } else if (element === "90") {
+          Status90 = true;
+        } else if (element === "91") {
+          Status91 = true;
+        } else if (element === "52") {
+          Status52 = true;
+        } else if (element === "53") {
+          Status53 = true;
+        }
+        // Status = true;
+      } else {
+        if (element === "103") {
+          Status103 = false;
+        } else if (element === "203") {
+          Status203 = false;
+        } else if (element === "204") {
+          Status204 = false;
+        } else if (element === "202") {
+          Status202 = false;
+        } else if (element === "207") {
+          Status207 = false;
+        } else if (element === "90") {
+          Status90 = false;
+        } else if (element === "91") {
+          Status91 = false;
+        } else if (element === "52") {
+          Status52 = false;
+        } else if (element === "53") {
+          Status53 = false;
+        }
+        console.log("====___>", element, false);
+        // Status = false;
+      }
+    });
+
+    if (
+      Status103 &&
+      Status203 &&
+      Status204 &&
+      Status202 &&
+      Status207 &&
+      Status90 &&
+      Status91 &&
+      Status52 &&
+      Status53
+    ) {
+      const treatmentDetails = await connection.query(
+        getDiagnosisTreatmentQuery,
+        [refPTcreatedDate, patientId, "Anti-diabetic"]
+      );
+
+      const diabetesResult = Diabetes(
+        scoreResult.rows,
+        treatmentDetails.rows[0].treatementdetails
+      );
+
+      // Hypertension Diagnosis
+      const hypertensiontreatmentDetails = await connection.query(
+        getDiagnosisTreatmentQuery,
+        [refPTcreatedDate, patientId, "Anti-hypertensive"]
+      );
+
+      const ageQuery = await connection.query(getPatientDetail, [patientId]);
+
+      const age = calculateAge(ageQuery.rows[0].refDOB);
+
+      const hypertensionResult = Hypertension(
+        scoreResult.rows,
+        hypertensiontreatmentDetails.rows[0].treatementdetails,
+        treatmentDetails.rows[0].treatementdetails,
+        age
+      );
+
+      console.log(diabetesResult, hypertensionResult);
+
+      totalScoreResult.push({
+        createdAt: createdAt,
+        refCategoryLabel: "Diabetes Diagnosis Algorithm",
+        refPTScore: diabetesResult,
+        refPTStatus: "1",
+        refPTcreatedDate: createdAt,
+        refQCategoryId: "237",
+      });
+
+      totalScoreResult.push({
+        createdAt: createdAt,
+        refCategoryLabel: "Hypertension Diagnosis Algorithm",
+        refPTScore: hypertensionResult,
+        refPTStatus: "1",
+        refPTcreatedDate: createdAt,
+        refQCategoryId: "238",
+      });
+    }
 
     return {
       status: true,
       doctorDetails: doctorResult.rows[0],
       patientDetails: patientResult.rows[0],
-      scoreResult: scoreResult.rows,
+      // scoreResult: scoreResult.rows,
+      scoreResult: totalScoreResult,
       scoreVerifyResult: scoreVerifyResult.rows,
       generateDate: createdAt,
       categoryResult: categoryResult.rows,

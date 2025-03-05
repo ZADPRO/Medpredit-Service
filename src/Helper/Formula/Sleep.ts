@@ -1,4 +1,4 @@
-import { getTotalHoursBetween } from "../CurrentTime";
+const logger = require("../../Helper/Logger");
 
 function timeDifference(payload) {
   const { startTime, endTime, timeToSubtract } = payload;
@@ -78,7 +78,7 @@ export const Sleep = (answers: any, mappedResult: any) => {
   });
 
   const q4 = result.hours + ":" + result.minutes;
-  
+
   const q5_1 = answers.find((element) => element.questionId === 90)
     ? answers.find((element) => element.questionId === 90)
     : 0;
@@ -211,16 +211,15 @@ export const Sleep = (answers: any, mappedResult: any) => {
 
   //Component 4
 
-  
   let hoursbed = timeDifference({
     startTime: q1.answer,
     endTime: q3.answer,
     timeToSubtract: 0,
-  })
-  result.hours + ":" + result.minutes
+  });
+  result.hours + ":" + result.minutes;
 
-  let hoursbedResult = hoursbed.hours + hoursbed.minutes / 60
-  
+  let hoursbedResult = hoursbed.hours + hoursbed.minutes / 60;
+
   comp4 = (hourslept / hoursbedResult) * 100;
 
   const sleepefficiency = (hourslept / hoursbedResult) * 100;
@@ -260,6 +259,23 @@ export const Sleep = (answers: any, mappedResult: any) => {
   else if (com7val >= 5 && com7val <= 6) comp7 = 3;
 
   global = comp1 + comp2 + comp3 + comp4 + comp5 + comp6 + comp7;
+
+  console.log(
+    global,
+    comp1,
+    comp2,
+    comp3,
+    parseFloat(sleepefficiency.toFixed(2)),
+    comp5,
+    comp6,
+    comp7
+  );
+
+  logger.info(
+    `${global} ${comp1} ${comp2} ${comp3} ${parseFloat(
+      sleepefficiency.toFixed(2)
+    )} ${comp5} ${comp6} ${comp7}`
+  );
 
   return [
     global,

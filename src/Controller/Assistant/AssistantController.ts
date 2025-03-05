@@ -272,7 +272,7 @@ const postAnswersController = async (req, res) => {
 
     console.log("hello")
 
-    await createReportModel(patientId, doctorId, hospitalId, createdBy);
+    // await createReportModel(patientId, doctorId, hospitalId, createdBy);
 
     logger.info(`User (${patientId}) Answered (${categoryId})`);
 
