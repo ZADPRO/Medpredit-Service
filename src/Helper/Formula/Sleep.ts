@@ -1,4 +1,4 @@
-import { getHoursAndMinutesBetween } from "../CurrentTime";
+import { getTotalHoursBetween } from "../CurrentTime";
 
 function timeDifference(payload) {
   const { startTime, endTime, timeToSubtract } = payload;
@@ -78,9 +78,7 @@ export const Sleep = (answers: any, mappedResult: any) => {
   });
 
   const q4 = result.hours + ":" + result.minutes;
-
-  console.log(q4);
-
+  
   const q5_1 = answers.find((element) => element.questionId === 90)
     ? answers.find((element) => element.questionId === 90)
     : 0;
@@ -213,11 +211,19 @@ export const Sleep = (answers: any, mappedResult: any) => {
 
   //Component 4
 
-  let hoursbed =
-    getHoursAndMinutesBetween(q1.answer, q3.answer).hours +
-    getHoursAndMinutesBetween(q1.answer, q3.answer).minutes / 60;
+  
+  let hoursbed = timeDifference({
+    startTime: q1.answer,
+    endTime: q3.answer,
+    timeToSubtract: 0,
+  })
+  result.hours + ":" + result.minutes
 
-  const sleepefficiency = (hourslept / hoursbed) * 100;
+  let hoursbedResult = hoursbed.hours + hoursbed.minutes / 60
+  
+  comp4 = (hourslept / hoursbedResult) * 100;
+
+  const sleepefficiency = (hourslept / hoursbedResult) * 100;
 
   if (sleepefficiency >= 85) comp4 = 0;
   else if (sleepefficiency >= 75 && sleepefficiency <= 84) comp4 = 1;
@@ -255,5 +261,14 @@ export const Sleep = (answers: any, mappedResult: any) => {
 
   global = comp1 + comp2 + comp3 + comp4 + comp5 + comp6 + comp7;
 
-  return [global, comp1, comp2, comp3, comp4, comp5, comp6, comp7];
+  return [
+    global,
+    comp1,
+    comp2,
+    comp3,
+    parseFloat(sleepefficiency.toFixed(2)),
+    comp5,
+    comp6,
+    comp7,
+  ];
 };
