@@ -13,6 +13,12 @@ export const getDateOnly = (): Date => {
   return new Date(year, month, day);
 };
 
+export const getParticularDateOnly = (delayDate: number) => {
+  const today = new Date();
+  today.setDate(today.getDate() - delayDate); // Subtract 1 day
+  return new Date(today.getFullYear(), today.getMonth(), today.getDate());
+};
+
 export const calculateAge = (dateOfBirth) => {
   const dob = new Date(dateOfBirth); // Parse the given date
   const today = new Date(); // Current date
@@ -45,7 +51,8 @@ export const getTotalHoursBetween = (startTime: string, endTime: string) => {
   };
 
   // Convert both times to 24-hour format
-  const { hour: startHour, minute: startMinute } = convertTo24HourFormat(startTime);
+  const { hour: startHour, minute: startMinute } =
+    convertTo24HourFormat(startTime);
   const { hour: endHour, minute: endMinute } = convertTo24HourFormat(endTime);
 
   // Set the date for both times

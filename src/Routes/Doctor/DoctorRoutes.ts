@@ -11,6 +11,8 @@ const {
   createReportController,
   getPastReportDataController,
   getReportPDFController,
+  getHomeScreenController,
+  getHomeScreenAssistantController,
 } = require("../../Controller/Doctor/DoctorController");
 
 const DoctorRoutes = express.Router();
@@ -36,5 +38,13 @@ DoctorRoutes.post(
 );
 
 DoctorRoutes.post("/getReportPDF", verifyToken, getReportPDFController);
+
+DoctorRoutes.post("/getHomeScreenDoctor", verifyToken, getHomeScreenController);
+
+DoctorRoutes.post(
+  "/getHomeScreenDoctorAssistant",
+  verifyToken,
+  getHomeScreenAssistantController
+);
 
 export default DoctorRoutes;
