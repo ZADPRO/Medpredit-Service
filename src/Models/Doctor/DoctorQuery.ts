@@ -259,3 +259,70 @@ WHERE
   rpm."refPatientId" = $1
   AND rtd."refTDCreatedDate"::DATE = CAST($2 AS DATE)
   `;
+
+export const checkCreateReport = `
+  SELECT
+  *
+FROM
+  public."refUserScoreDetail" rusd
+  FULL JOIN public."refPatientTransaction" rpt ON rpt."refPTId" = rusd."refPTId"::INTEGER
+  WHERE DATE(rpt."refPTcreatedDate") = DATE($1)
+  AND (rpt."refPMId" = $2 OR rpt."refUserId" = $3)
+  AND rusd."refQCategoryId" = '237'
+  `;
+
+export const getHomePatient = `
+SELECT DISTINCT
+  ON (rpt."refPMId", DATE (rpt."createdAt")) *
+FROM
+  public."refPatientTransaction" rpt
+  FULL JOIN public."refPatientMap" rpm ON rpm."refPMId" = rpt."refPMId"::INTEGER
+  FULL JOIN public."refDoctorMap" rdm ON rdm."refDMId" = rpm."refDoctorId"::INTEGER
+WHERE
+  rdm."refDoctorId" = $1
+  AND DATE (rpt."refPTcreatedDate") >= ($2)
+  AND DATE (rpt."refPTcreatedDate") <= DATE ($3)
+  `;
+
+export const getHomeCategory = `
+  SELECT DISTINCT
+  ON (rpt."refPMId", DATE (rpt."createdAt")) *
+FROM
+  public."refPatientTransaction" rpt
+  FULL JOIN public."refPatientMap" rpm ON rpm."refPMId" = rpt."refPMId"::INTEGER
+  FULL JOIN public."refDoctorMap" rdm ON rdm."refDMId" = rpm."refDoctorId"::INTEGER
+  FULL JOIN public."refUserScoreDetail" rusd ON rusd."refPTId" = rpt."refPTId"::TEXT
+WHERE
+  rdm."refDoctorId" = $1
+  AND DATE (rpt."refPTcreatedDate") >= ($2)
+  AND DATE (rpt."refPTcreatedDate") <= DATE ($3)
+  AND rusd."refQCategoryId" = $4
+  `;
+
+export const getHomePatientAssistant = `
+  SELECT DISTINCT
+  ON (rpt."refPMId", DATE (rpt."createdAt")) *
+FROM
+  public."refPatientTransaction" rpt
+  FULL JOIN public."refPatientMap" rpm ON rpm."refPMId" = rpt."refPMId"::INTEGER
+  FULL JOIN public."refDoctorMap" rdm ON rdm."refDMId" = rpm."refDoctorId"::INTEGER
+WHERE
+  rpt."createdBy" = $1
+  AND DATE (rpt."refPTcreatedDate") >= ($2)
+  AND DATE (rpt."refPTcreatedDate") <= DATE ($3)
+  `;
+
+export const getHomeCategoryAssistant = `
+  SELECT DISTINCT
+  ON (rpt."refPMId", DATE (rpt."createdAt")) *
+FROM
+  public."refPatientTransaction" rpt
+  FULL JOIN public."refPatientMap" rpm ON rpm."refPMId" = rpt."refPMId"::INTEGER
+  FULL JOIN public."refDoctorMap" rdm ON rdm."refDMId" = rpm."refDoctorId"::INTEGER
+  FULL JOIN public."refUserScoreDetail" rusd ON rusd."refPTId" = rpt."refPTId"::TEXT
+WHERE
+  rpt."createdBy" = $1
+  AND DATE (rpt."refPTcreatedDate") >= ($2)
+  AND DATE (rpt."refPTcreatedDate") <= DATE ($3)
+  AND rusd."refQCategoryId" = $4
+  `;

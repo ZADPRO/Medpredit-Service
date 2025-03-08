@@ -269,11 +269,15 @@ const postAnswersController = async (req, res) => {
       hospitalId
     );
 
-    await createReportModel(patientId, doctorId, hospitalId, createdBy);
+
+    console.log("hello")
+
+    // await createReportModel(patientId, doctorId, hospitalId, createdBy);
 
     logger.info(`User (${patientId}) Answered (${categoryId})`);
 
     return res.status(200).json(encrypt(result, true));
+    // return res.status(200).json(encrypt({status:true}, true));
   } catch (error) {
     logger.error(`POst Answer (postAnswersController) Error: (${error})`);
     console.error("Something went Wrong");

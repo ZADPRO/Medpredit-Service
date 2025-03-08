@@ -12,6 +12,7 @@ import { Sleep } from "../../Helper/Formula/Sleep";
 import { Stress } from "../../Helper/Formula/Stress";
 import { Tabacco } from "../../Helper/Formula/Tobacco";
 import { Vitals } from "../../Helper/Formula/Vitals";
+const logger = require("../../Helper/Logger");
 import {
   addPatientIdTransactionQuery,
   checkMobileNumberQuery,

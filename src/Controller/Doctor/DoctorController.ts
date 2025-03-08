@@ -11,6 +11,8 @@ import {
   getPastReportDataModel,
   getCurrentReportPDFModel,
   getPastReportPDFModel,
+  getHomeScreenModel,
+  getHomeScreenAssistantModel,
 } from "../../Models/Doctor/DoctorModel";
 
 const checkPatientMapController = async (req, res) => {
@@ -168,6 +170,34 @@ const getReportPDFController = async (req, res) => {
   }
 };
 
+const getHomeScreenController = async (req, res) => {
+  try {
+    const { hospitalId } = req.body;
+    let doctorId = req.userData.userid;
+
+    const result = await getHomeScreenModel(doctorId, hospitalId);
+    return res.status(200).json(encrypt(result, true));
+  } catch (error) {
+    logger.error(`Get Report PDF (getReportPDFController) Error: (${error})`);
+    console.error("Something went Wrong");
+    return res.status(500).json({ error: "Something went Wrong" });
+  }
+};
+
+const getHomeScreenAssistantController = async (req, res) => {
+  try {
+    const { hospitalId } = req.body;
+    let doctorId = req.userData.userid;
+
+    const result = await getHomeScreenAssistantModel(doctorId, hospitalId);
+    return res.status(200).json(encrypt(result, true));
+  } catch (error) {
+    logger.error(`Get Report PDF (getReportPDFController) Error: (${error})`);
+    console.error("Something went Wrong");
+    return res.status(500).json({ error: "Something went Wrong" });
+  }
+};
+
 module.exports = {
   checkPatientMapController,
   addPatientMapController,
@@ -175,4 +205,6 @@ module.exports = {
   createReportController,
   getPastReportDataController,
   getReportPDFController,
+  getHomeScreenController,
+  getHomeScreenAssistantController,
 };

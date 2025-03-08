@@ -13,6 +13,12 @@ export const getDateOnly = (): Date => {
   return new Date(year, month, day);
 };
 
+export const getParticularDateOnly = (delayDate: number) => {
+  const today = new Date();
+  today.setDate(today.getDate() - delayDate); // Subtract 1 day
+  return new Date(today.getFullYear(), today.getMonth(), today.getDate());
+};
+
 export const calculateAge = (dateOfBirth) => {
   const dob = new Date(dateOfBirth); // Parse the given date
   const today = new Date(); // Current date
@@ -28,13 +34,26 @@ export const calculateAge = (dateOfBirth) => {
   return age;
 };
 
-export const getHoursAndMinutesBetween = (
-  startTime: string,
-  endTime: string
-) => {
-  // Parse the times as Date objects with the same date for comparison
-  const [startHour, startMinute] = startTime.split(":").map(Number);
-  const [endHour, endMinute] = endTime.split(":").map(Number);
+export const getTotalHoursBetween = (startTime: string, endTime: string) => {
+  // Function to convert 12-hour format to 24-hour format
+  const convertTo24HourFormat = (time: string) => {
+    const [timePart, modifier] = time.split(" ");
+    let [hour, minute] = timePart.split(":").map(Number);
+
+    if (modifier === "PM" && hour < 12) {
+      hour += 12; // Convert PM hour to 24-hour format
+    }
+    if (modifier === "AM" && hour === 12) {
+      hour = 0; // Midnight case
+    }
+
+    return { hour, minute };
+  };
+
+  // Convert both times to 24-hour format
+  const { hour: startHour, minute: startMinute } =
+    convertTo24HourFormat(startTime);
+  const { hour: endHour, minute: endMinute } = convertTo24HourFormat(endTime);
 
   // Set the date for both times
   const today = new Date();
@@ -52,14 +71,10 @@ export const getHoursAndMinutesBetween = (
   // Calculate the difference in milliseconds
   const differenceMs = endDate.getTime() - startDate.getTime();
 
-  // Convert milliseconds to total minutes
-  const totalMinutes = Math.floor(differenceMs / (1000 * 60));
+  // Convert milliseconds to total hours
+  const totalHours = differenceMs / (1000 * 60 * 60); // This will be a decimal value
 
-  // Extract hours and minutes
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-
-  return { hours, minutes };
+  return totalHours;
 };
 
 export const calculateDaysDifference = (date1, date2) => {

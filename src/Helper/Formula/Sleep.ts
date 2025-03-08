@@ -1,4 +1,43 @@
-import { getHoursAndMinutesBetween } from "../CurrentTime";
+const logger = require("../../Helper/Logger");
+
+function timeDifference(payload) {
+  const { startTime, endTime, timeToSubtract } = payload;
+
+  // Helper function to convert time (HH:MM AM/PM) to minutes
+  function timeToMinutes(time) {
+    const [timeString, period] = time.split(" ");
+    let [hours, minutes] = timeString.split(":").map(Number);
+
+    if (period === "pm" && hours !== 12) hours += 12;
+    if (period === "am" && hours === 12) hours = 0;
+
+    return hours * 60 + minutes;
+  }
+
+  // Convert both start and end time to minutes
+  const startMinutes = timeToMinutes(startTime);
+  const endMinutes = timeToMinutes(endTime);
+
+  // Calculate difference in minutes
+  let diffMinutes = endMinutes - startMinutes;
+
+  // If the end time is earlier in the day (crosses midnight)
+  if (diffMinutes < 0) {
+    diffMinutes += 24 * 60; // Add 24 hours worth of minutes
+  }
+
+  // Subtract the provided minutes
+  diffMinutes -= timeToSubtract;
+
+  // Convert the result back to hours and minutes
+  const resultHours = Math.floor(diffMinutes / 60);
+  const resultMinutes = diffMinutes % 60;
+
+  return {
+    hours: resultHours,
+    minutes: resultMinutes,
+  };
+}
 
 export const Sleep = (answers: any, mappedResult: any) => {
   answers.sort((a, b) => a.questionId - b.questionId);
@@ -32,9 +71,13 @@ export const Sleep = (answers: any, mappedResult: any) => {
     ? answers.find((element) => element.questionId === 86)
     : 0;
 
-  const q4 = answers.find((element) => element.questionId === 88)
-    ? answers.find((element) => element.questionId === 88)
-    : 0;
+  const result = timeDifference({
+    startTime: q1.answer,
+    endTime: q3.answer,
+    timeToSubtract: q2.answer,
+  });
+
+  const q4 = result.hours + ":" + result.minutes;
 
   const q5_1 = answers.find((element) => element.questionId === 90)
     ? answers.find((element) => element.questionId === 90)
@@ -159,21 +202,27 @@ export const Sleep = (answers: any, mappedResult: any) => {
   comp2 = a + b;
 
   //Component 3
-  if (q4.answer > 7) comp3 = 0;
-  else if (q4.answer > 6 && q4.answer <= 7) comp3 = 1;
-  else if (q4.answer > 5 && q4.answer <= 6) comp3 = 2;
-  else if (q4.answer <= 5) comp3 = 3;
+  let hourslept = parseInt(q4.split(":")[0]) + parseInt(q4.split(":")[1]) / 60;
+
+  if (hourslept > 7) comp3 = 0;
+  else if (hourslept > 6 && hourslept <= 7) comp3 = 1;
+  else if (hourslept > 5 && hourslept <= 6) comp3 = 2;
+  else if (hourslept <= 5) comp3 = 3;
 
   //Component 4
 
-  let hourslept =
-    parseInt(q4.answer.split(":")[0]) + parseInt(q4.answer.split(":")[1]) / 60;
+  let hoursbed = timeDifference({
+    startTime: q1.answer,
+    endTime: q3.answer,
+    timeToSubtract: 0,
+  });
+  result.hours + ":" + result.minutes;
 
-  let hoursbed =
-    getHoursAndMinutesBetween(q1.answer, q3.answer).hours +
-    getHoursAndMinutesBetween(q1.answer, q3.answer).minutes / 60;
+  let hoursbedResult = hoursbed.hours + hoursbed.minutes / 60;
 
-  const sleepefficiency = (hourslept / hoursbed) * 100;
+  comp4 = (hourslept / hoursbedResult) * 100;
+
+  const sleepefficiency = (hourslept / hoursbedResult) * 100;
 
   if (sleepefficiency >= 85) comp4 = 0;
   else if (sleepefficiency >= 75 && sleepefficiency <= 84) comp4 = 1;
@@ -211,5 +260,31 @@ export const Sleep = (answers: any, mappedResult: any) => {
 
   global = comp1 + comp2 + comp3 + comp4 + comp5 + comp6 + comp7;
 
-  return [global, comp1, comp2, comp3, comp4, comp5, comp6, comp7];
+  console.log(
+    global,
+    comp1,
+    comp2,
+    comp3,
+    parseFloat(sleepefficiency.toFixed(2)),
+    comp5,
+    comp6,
+    comp7
+  );
+
+  logger.info(
+    `${global} ${comp1} ${comp2} ${comp3} ${parseFloat(
+      sleepefficiency.toFixed(2)
+    )} ${comp5} ${comp6} ${comp7}`
+  );
+
+  return [
+    global,
+    comp1,
+    comp2,
+    comp3,
+    parseFloat(sleepefficiency.toFixed(2)),
+    comp5,
+    comp6,
+    comp7,
+  ];
 };
