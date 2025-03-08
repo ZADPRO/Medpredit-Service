@@ -5,11 +5,9 @@ export const Hypertension = (
   age: any
 ) => {
   let systemicHypertension = scoreResult.find(
-    (item) => item.refQCategoryId === "52"
+    (item) => item.refQCategoryId === "95"
   )?.refPTScore;
-  let diabtesmellitus = scoreResult.find(
-    (item) => item.refQCategoryId === "53"
-  )?.refPTScore;
+
   let sbp = parseInt(
     scoreResult.find((item) => item.refQCategoryId === "90")?.refPTScore
   );
@@ -51,6 +49,16 @@ export const Hypertension = (
       }
     }
 
+    console.log(scoreResult.find((item) => item.refQCategoryId === "95"));
+
+    console.log(
+      "-------------------AGe>",
+      age,
+      sbp,
+      dbp,
+      systemicHypertension,
+      hypertensiontreatmentDetails
+    );
     //Newly Diagnosed Hypertension Stage 1
     if ((sbp >= 130 && sbp <= 139) || (dbp >= 80 && dbp <= 89)) {
       if (systemicHypertension === "No" && !hypertensiontreatmentDetails) {
@@ -85,6 +93,8 @@ export const Hypertension = (
       return "Known Systemic Hypertension Uncontrolled With Medication";
     }
 
+    console.log("----------sbp", sbp, dbp);
+
     //Known Systemic Hypertension Controlled Without Medication
     if (
       systemicHypertension === "Yes" &&
@@ -102,7 +112,7 @@ export const Hypertension = (
       sbp >= 140 &&
       dbp >= 90
     ) {
-      return "Known Systemic Hypertension Controlled Without Medication";
+      return "Known Systemic Hypertension Uncontrolled Without Medication";
     }
 
     //Newly Diagnosed Systemic Hypertension and Diabetes
@@ -164,7 +174,7 @@ export const Hypertension = (
         return "Known Hypertension & DM - BP Controlled Without Medication";
       }
     }
-    
+
     //Known Hypertension & DM - BP Uncontrolled Without Medication
     if (sbp >= 130 || dbp >= 85) {
       if (
