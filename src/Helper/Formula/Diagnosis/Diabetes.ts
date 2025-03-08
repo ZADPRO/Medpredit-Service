@@ -59,7 +59,7 @@ export const Diabetes = (scoreResult: any, treatmentDetails: any) => {
     }
   }
 
-  console.log(PreviousDiabetics, treatmentDetails, fbs, ppbs, rbs, hba1c);
+  // console.log(PreviousDiabetics, treatmentDetails, fbs, ppbs, rbs, hba1c);
 
   return "Condition Not Statisfied";
 };

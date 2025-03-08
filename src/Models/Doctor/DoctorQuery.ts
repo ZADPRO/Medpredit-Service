@@ -221,7 +221,6 @@ FROM
 WHERE
   DATE(rpt."refPTcreatedDate") = $1
   AND rpm."refPatientId" = $2
-  AND rusd."refQCategoryId" IN ('103', '203', '204', '202', '207','52','53','90','91');
   `;
 
 export const getDiagnosisTreatmentQuery = `
