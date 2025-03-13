@@ -47,8 +47,7 @@ export const UserLoginModel = async (username: string, password: string) => {
             message: "Signin Successfull",
             roleType: result.rows[0].refRoleId,
             users: result.rows,
-            token: result.rows.length === 1 ? accessToken : null,
-            action: result.rows.length === 1 ? "single" : "multiple",
+            token: accessToken,
           };
         } else
           return { status: false, message: "Invalid Username or Password" };
