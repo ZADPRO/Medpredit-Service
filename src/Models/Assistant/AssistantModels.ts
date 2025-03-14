@@ -484,6 +484,7 @@ export const postAnswersModels = async (
         "40",
         "41",
         "42",
+        "239",
       ];
     } else if (categoryId === "11") {
       score = Alcohol(answers, mappedResult);

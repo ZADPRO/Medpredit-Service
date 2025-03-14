@@ -5,10 +5,11 @@ export const Tabacco = (answers: any) => {
   let home = "";
   let workplace = "";
   let attitudetoward = "";
-  let packyear = 0;
+  let packyear: any = 0;
   let riskpackyear = "";
-  let riskpastsmoking = "";
-  let highrisksmokeless = "No";
+  let riskpastsmoking = "No Risk";
+  let highrisksmokeless = "No Risk";
+  let durationofsmokeless = "No Usage";
 
   const q1 = answers.find((element) => element.questionId === 56)
     ? answers.find((element) => element.questionId === 56).answer
@@ -19,8 +20,8 @@ export const Tabacco = (answers: any) => {
   const q3 = answers.find((element) => element.questionId === 58)
     ? answers.find((element) => element.questionId === 58).answer
     : 0;
-  const q4 = answers.find((element) => element.questionId === 60)
-    ? answers.find((element) => element.questionId === 60).answer
+  const q4 = answers.find((element) => element.questionId === 59)
+    ? answers.find((element) => element.questionId === 59)
     : 0;
   const q5 = answers.find((element) => element.questionId === 62)
     ? answers.find((element) => element.questionId === 62).answer
@@ -42,6 +43,12 @@ export const Tabacco = (answers: any) => {
     : 0;
   const q11 = answers.find((element) => element.questionId === 68)
     ? answers.find((element) => element.questionId === 68).answer
+    : 0;
+  const q12 = answers.find((element) => element.questionId === 69)
+    ? answers.find((element) => element.questionId === 69).answer
+    : 0;
+  const q13 = answers.find((element) => element.questionId === 70)
+    ? answers.find((element) => element.questionId === 70)
     : 0;
   const q14 = answers.find((element) => element.questionId === 73)
     ? answers.find((element) => element.questionId === 73).answer
@@ -123,51 +130,80 @@ export const Tabacco = (answers: any) => {
   // Attitude towards
   if (q5 === 209) attitudetoward = "Willing to quit";
   if (q6 === 211) attitudetoward = "Adviced to quit";
-  if (q5 === 210 && (q6 === 212 || q6 === 213)) {
-    attitudetoward = "Neither willing nor advised to quit";
-  }
+  if (q5 === 210) attitudetoward = "Not Willing to quit";
+  if (q6 === 213) attitudetoward = "Not Adviced to quit";
 
   //   Calculate Pack Years
-
   if (q3 && q2) {
-    const a = parseInt(q3, 10) / 52; // Ensure proper radix for parseInt
+    const a = parseInt(q3); // Ensure proper radix for parseInt
     let b = 0;
+    let tempb = 0;
+    q4.answer.map((element) => {
+      tempb += parseFloat(element.days);
+    });
 
     // Calculate b based on q2
     if (q2 === 197) {
-      b = parseInt(q4, 10);
+      b = tempb;
     } else if (q2 === 198) {
-      b = parseInt(q4, 10) / 7;
+      b = tempb / 7;
     }
 
     // Calculate packyear
-    packyear = (a * b) / 20;
+    packyear = ((a * b) / 20).toFixed(2);
 
     // Determine risk level
-    if (isNaN(packyear) || packyear === 0) {
+    if (isNaN(packyear) || packyear === 0.0) {
       riskpackyear = "No Risk";
-    } else if (packyear > 0 && packyear <= 1) {
+    } else if (packyear > 0.01 && packyear <= 0.99) {
       riskpackyear = "Low Risk";
-    } else if (packyear > 1 && packyear <= 5) {
+    } else if (packyear > 1.0 && packyear <= 5.0) {
       riskpackyear = "Moderate Risk";
-    } else if (packyear > 5) {
+    } else if (packyear > 5.01) {
       riskpackyear = "Severe Risk";
     }
   }
 
   //Calculate Risk of Past Smoking
-  if (q9) {
-    let c = parseInt(q9) / 52;
 
-    if (c < 5) {
-      riskpastsmoking = "Low risk of past smoking";
-    } else if (c >= 5 && c <= 10) {
-      riskpastsmoking = "Moderate risk of past smoking";
-    } else if (c > 10) {
+  if (q7 === 214) riskpastsmoking = "High risk of past smoking";
+  if (q9) {
+    let c = (parseInt(q9) / 52).toFixed(2);
+
+    if (parseFloat(c) < 5.0) {
       riskpastsmoking = "High risk of past smoking";
+    } else if (parseFloat(c) >= 5.01 && parseFloat(c) <= 10.0) {
+      riskpastsmoking = "Moderate risk of past smoking";
+    } else if (parseFloat(c) >= 10.01) {
+      riskpastsmoking = "Low risk of past smoking";
     }
   }
-  
+
+  // Calculate High risk of smokeless tobacoo
+  if (q11 === 221) highrisksmokeless = "High Risk";
+
+  let tempsmokelessuse = 0;
+  q13.answer.map((element) => {
+    tempsmokelessuse += parseInt(element.days);
+  });
+
+  if (tempsmokelessuse >= 1) highrisksmokeless = "High Risk";
+
+  //Calculate Duration of smokeless Tobacco
+  if (parseFloat(q12) > 0.0 && parseFloat(q12) <= 0.25) {
+    durationofsmokeless = "Immediate";
+  } else if (parseFloat(q12) > 0.25 && parseFloat(q12) <= 1.0) {
+    durationofsmokeless = "Short-Term";
+  } else if (parseFloat(q12) > 1.01 && parseFloat(q12) <= 5.0) {
+    durationofsmokeless = "Medium-Term";
+  } else if (parseFloat(q12) > 5.01 && parseFloat(q12) <= 10.0) {
+    durationofsmokeless = "Long-Term";
+  } else if (parseFloat(q12) > 10.01) {
+    durationofsmokeless = "Veteran";
+  }
+
+  console.log(q12, durationofsmokeless);
+
   return [
     tobacco,
     smokingtobacco,
@@ -179,5 +215,6 @@ export const Tabacco = (answers: any) => {
     riskpackyear,
     riskpastsmoking,
     highrisksmokeless,
+    durationofsmokeless,
   ];
 };
