@@ -5,9 +5,19 @@ export const SingleSelectValues = (
   currentValue: any
 ) => {
   const data = answers.find((item) => item.questionId === previousValue);
-  let value = data.answer;
+  let value = Array.isArray(data.answer) ? data.answer : [];
 
   let answer = answers.find((item) => item.questionId === currentValue).answer;
+
+  const currentDate = new Date();
+  const isoDate = currentDate.toISOString();
+
+  value.push({
+    date: isoDate,
+    number: mappedResult.flat().find((option) => option.refOptionId === answer)
+      ?.refOptionLabel,
+    flag: "db",
+  });
 
   return {
     score: [
