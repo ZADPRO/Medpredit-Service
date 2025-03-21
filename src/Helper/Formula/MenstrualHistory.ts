@@ -55,11 +55,14 @@ export const MenstrualHistory = (answers: any, mappedResult: any) => {
       }
     } else if (element.questionId === 83) {
       result.push(element.answer);
-    } else if (element.questionId === 84) {
-      result.push(element.answer);
+    } else if (element.questionId === 346) {
+      if (element.answer === 770) {
+        result.push(answers.find((item) => item.questionId === 84).answer);
+      } else if (element.answer === 771) {
+        result.push("-");
+      }
     }
   }
-  
 
   return result;
 };

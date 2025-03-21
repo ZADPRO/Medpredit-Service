@@ -15,24 +15,30 @@ import { Vitals } from "../../Helper/Formula/Vitals";
 const logger = require("../../Helper/Logger");
 import {
   addPatientIdTransactionQuery,
+  checkAgeQuery,
   checkMobileNumberQuery,
   deleteTreatmentDetailQuery,
   deleteTreatmentDetails,
+  diagosisCategory,
   getInvestigationDetailsQuery,
   getProfileQueryAssistant,
   getProfileQueryUsers,
   getQuestionScoreQuery,
   insertInvestigationDetails,
   insertTreatmentDetails,
+  insertTreatmentDetailsPatientId,
   overAllId,
   postReportParticularDate,
   resetScoreInvestigationDetails,
+  updateTreatmentDetails,
 } from "./AssistantQuery";
 import { SingleSelectValues } from "../../Helper/Formula/Investigation/SingleSelectValue";
 import { USGAbdmen } from "../../Helper/Formula/Investigation/USGAbdmen";
 import { createReportModel } from "../Doctor/DoctorModel";
 
 import nodemailer from "nodemailer";
+import { TC } from "../../Helper/Formula/Investigation/TC";
+import { HDLScore } from "../../Helper/Formula/Investigation/HDL";
 
 /**
  * Sends a PDF report via email using Nodemailer.
@@ -414,8 +420,10 @@ const insertInvestigationPreviousValues = async (
         PTcreatedDate,
         element.date,
         element.number,
+        element.oneHour ? element.oneHour : "",
+        element.twoHours ? element.twoHours : "",
         patientId,
-        categoryId,
+        element.categoryId ? element.categoryId : categoryId,
       ]);
     }
   });
@@ -464,6 +472,8 @@ export const postAnswersModels = async (
 
     let score = [];
     let multiCategoryId = [];
+
+    const ageQuery = await connection.query(checkAgeQuery, [patientId]);
 
     if (categoryId === "8") {
       score = PhysicalAactivity(answers);
@@ -540,7 +550,7 @@ export const postAnswersModels = async (
         "93",
       ];
     } else if (categoryId === "94") {
-      score = PreviousIllness(answers);
+      score = PreviousIllness(answers, ageQuery.rows[0].refDOB);
       multiCategoryId = [
         "94",
         "95",
@@ -652,31 +662,78 @@ export const postAnswersModels = async (
       ];
     } else if (categoryId === "201") {
       answers.forEach(async (element) => {
-        await connection.query(insertTreatmentDetails, [
-          mapId,
-          element.nameOfMedicine,
-          element.category,
-          element.strength,
-          element.roa,
-          element.relationToFood,
-          element.morningdosage,
-          element.morningtime,
-          element.afternoondosage,
-          element.afternoontime,
-          element.eveningdosage,
-          element.eveningtime,
-          element.nightdosage,
-          element.nighttime,
-          element.monthsduration,
-          element.yearsduration,
-          PTcreatedDate,
-          createdAt,
-          createdBy,
-        ]);
+        if (!element.id) {
+          if (hospitalId !== "undefined") {
+            await connection.query(insertTreatmentDetails, [
+              mapId,
+              element.nameOfMedicine,
+              element.category,
+              element.strength,
+              element.roa,
+              element.relationToFood,
+              element.morningdosage,
+              element.morningtime,
+              element.afternoondosage,
+              element.afternoontime,
+              element.eveningdosage,
+              element.eveningtime,
+              element.nightdosage,
+              element.nighttime,
+              element.monthsduration,
+              element.yearsduration,
+              PTcreatedDate,
+              createdAt,
+              createdBy,
+            ]);
+          } else {
+            await connection.query(insertTreatmentDetailsPatientId, [
+              patientId,
+              element.nameOfMedicine,
+              element.category,
+              element.strength,
+              element.roa,
+              element.relationToFood,
+              element.morningdosage,
+              element.morningtime,
+              element.afternoondosage,
+              element.afternoontime,
+              element.eveningdosage,
+              element.eveningtime,
+              element.nightdosage,
+              element.nighttime,
+              element.monthsduration,
+              element.yearsduration,
+              PTcreatedDate,
+              createdAt,
+              createdBy,
+            ]);
+          }
+        } else {
+          await connection.query(updateTreatmentDetails, [
+            element.nameOfMedicine,
+            element.category,
+            element.strength,
+            element.roa,
+            element.relationToFood,
+            element.morningdosage,
+            element.morningtime,
+            element.afternoondosage,
+            element.afternoontime,
+            element.eveningdosage,
+            element.eveningtime,
+            element.nightdosage,
+            element.nighttime,
+            element.monthsduration,
+            element.yearsduration,
+            createdAt,
+            hospitalId !== "undefined" ? createdBy : patientId,
+            element.id,
+          ]);
+        }
       });
 
-      score = [0];
-      multiCategoryId = ["201"];
+      // score = [0];
+      // multiCategoryId = ["201"];
     } else if (categoryId === "202") {
       let result = SingleValues(answers, 269, 268);
 
@@ -750,7 +807,18 @@ export const postAnswersModels = async (
       score = result.score;
       multiCategoryId = ["207"];
     } else if (categoryId === "213") {
-      let result = SingleValues(answers, 292, 291);
+      const HDL = await connection.query(diagosisCategory, [
+        getDateOnly(),
+        patientId,
+        "215",
+      ]);
+
+      let result = TC(
+        answers,
+        292,
+        291,
+        HDL.rows[0] ? HDL.rows[0].refPTScore : null
+      );
 
       insertInvestigationPreviousValues(
         result,
@@ -759,8 +827,14 @@ export const postAnswersModels = async (
         categoryId
       );
 
+      let multicat = ["213"];
+
+      if (HDL) {
+        multicat.push("217");
+      }
+
       score = result.score;
-      multiCategoryId = ["213"];
+      multiCategoryId = multicat;
     } else if (categoryId === "214") {
       let result = SingleValues(answers, 295, 294);
 
@@ -774,7 +848,18 @@ export const postAnswersModels = async (
       score = result.score;
       multiCategoryId = ["214"];
     } else if (categoryId === "215") {
-      let result = SingleValues(answers, 298, 297);
+      const TC = await connection.query(diagosisCategory, [
+        getDateOnly(),
+        patientId,
+        "213",
+      ]);
+
+      let result = HDLScore(
+        answers,
+        298,
+        297,
+        TC.rows[0] ? TC.rows[0].refPTScore : null
+      );
 
       insertInvestigationPreviousValues(
         result,
@@ -783,8 +868,14 @@ export const postAnswersModels = async (
         categoryId
       );
 
+      let multicat = ["215"];
+
+      if (TC) {
+        multicat.push("217");
+      }
+
       score = result.score;
-      multiCategoryId = ["215"];
+      multiCategoryId = multicat;
     } else if (categoryId === "216") {
       let result = SingleValues(answers, 302, 301);
 
@@ -885,9 +976,9 @@ export const postAnswersModels = async (
       let result: any = USGAbdmen(answers, mappedResult);
 
       result.investigationDataCategory.forEach((cat, index) => {
-        if (result.investigationData[index].answer.length > 0) {
+        if (result.investigationData[index].length > 0) {
           insertInvestigationPreviousValues(
-            { investigationData: result.investigationData[index].answer },
+            { investigationData: result.investigationData[index] },
             createdBy,
             patientId,
             cat
@@ -901,9 +992,11 @@ export const postAnswersModels = async (
         "225",
         "226",
         "227",
+        "240",
         "228",
         "229",
         "230",
+        "241",
         "231",
         "232",
         "233",
@@ -943,7 +1036,7 @@ export const postAnswersModels = async (
             "1",
             PTcreatedDate,
             createdAt,
-            createdBy,
+            patientId,
           ]);
         }
 

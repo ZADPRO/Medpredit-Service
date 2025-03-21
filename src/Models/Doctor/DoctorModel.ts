@@ -17,6 +17,7 @@ import {
 } from "../Assistant/AssistantQuery";
 import {
   checkCreateReport,
+  deleteTreatmentDetail,
   getAllCategoryFamilyHistory,
   getAllCategoryQuery,
   getAllScoreQuery,
@@ -592,7 +593,6 @@ export const getPastReportDataModel = async (
 
     const TreatmentDetails = await connection.query(getReportTreatmentDetails, [
       patientId,
-      reportDate,
     ]);
 
     const rbs = await connection.query(getPastInvestigation, [
@@ -723,10 +723,12 @@ export const getPastReportDataModel = async (
 
     return {
       doctorDetail: {
-        doctorName: doctor.doctorname,
-        doctorId: doctor.doctorid,
-        hospital: doctor.hospital,
-        hospitalAddress: doctor.hospitaladdress + ", " + doctor.hospitalpincode,
+        doctorName: doctor ? doctor.doctorname : "",
+        doctorId: doctor ? doctor.doctorid : "",
+        hospital: doctor ? doctor.hospital : "",
+        hospitalAddress: doctor
+          ? doctor.hospitaladdress + ", " + doctor.hospitalpincode
+          : "",
       },
       patientDetail: {
         patientName: patient.refUserFname + " " + patient.refUserLname,
@@ -904,8 +906,8 @@ export const getCurrentReportPDFModel = async (
 
     const treatementDetails = await connection.query(getTreatementDetails, [
       patientId,
-      createdAt,
     ]);
+    console.log("--->--->---.Success", patientResult.rows);
 
     const groupedData: Record<
       string,
@@ -1997,6 +1999,41 @@ export const getHomeScreenAssistantModel = async (
       previousmonth: previousmonth.rows.length,
       totalCategory: totalCategory,
       profileName: resultDoctor.rows[0],
+    };
+  } catch (error) {
+    console.error("Something went Wrong", error);
+    throw error;
+  } finally {
+    await connection.end();
+  }
+};
+
+export const getTreatmentDetailsModel = async (patientId: any) => {
+  const connection = await DB();
+  try {
+    const treatementDetails = await connection.query(getTreatementDetails, [
+      patientId,
+    ]);
+
+    return {
+      status: true,
+      treatementDetails: treatementDetails.rows,
+    };
+  } catch (error) {
+    console.error("Something went Wrong", error);
+    throw error;
+  } finally {
+    await connection.end();
+  }
+};
+
+export const deleteTreatmentDetailModel = async (id: any) => {
+  const connection = await DB();
+  try {
+    await connection.query(deleteTreatmentDetail, [id]);
+
+    return {
+      status: true,
     };
   } catch (error) {
     console.error("Something went Wrong", error);

@@ -1,11 +1,9 @@
-export const SingleValues = (
+export const HDLScore = (
   answers: any,
   previousValue: any,
-  currentValue: any
+  currentValue: any,
+  tcval: any
 ) => {
-
-  console.log(answers, previousValue, currentValue)
-
   if (!answers || !Array.isArray(answers)) {
     console.error("Invalid answers array:", answers);
     return { score: [], investigationData: [] };
@@ -29,14 +27,31 @@ export const SingleValues = (
   const isoDate = currentDate.toISOString();
   let value = Array.isArray(data.answer) ? data.answer : [];
 
+  const score = [];
+
+  score.push(currentAnswer.answer);
+
   value.push({
     date: isoDate,
     number: currentAnswer.answer,
     flag: "db",
   });
 
+  if (tcval) {
+    value.push({
+      date: isoDate,
+      categoryId: "217",
+      number: (parseFloat(tcval) / parseFloat(currentAnswer.answer)).toFixed(2),
+      flag: "db",
+    });
+
+    score.push(
+      (parseFloat(tcval) / parseFloat(currentAnswer.answer)).toFixed(2)
+    );
+  }
+
   return {
-    score: [currentAnswer.answer],
+    score: score,
     investigationData: value,
   };
 };

@@ -183,9 +183,11 @@ export const Tabacco = (answers: any) => {
   if (q11 === 221) highrisksmokeless = "High Risk";
 
   let tempsmokelessuse = 0;
-  q13.answer.map((element) => {
-    tempsmokelessuse += parseInt(element.days);
-  });
+  if (q13.answer) {
+    q13.answer.map((element) => {
+      tempsmokelessuse += parseInt(element.days);
+    });
+  }
 
   if (tempsmokelessuse >= 1) highrisksmokeless = "High Risk";
 

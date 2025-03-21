@@ -536,6 +536,77 @@ values
   )
   `;
 
+export const insertTreatmentDetailsPatientId = `
+insert into
+  "public"."refTreatmentDetails" (
+    "refUserId",
+    "refTDMedName",
+    "refTDCat",
+    "refTDStrength",
+    "refTDROA",
+    "refTDRTF",
+    "refTDMorningDosage",
+    "refTDMorningDosageTime",
+    "refTDAfternoonDosage",
+    "refTDAfternoonDosageTime",
+    "refTDEveningDosage",
+    "refTDEveningDosageTime",
+    "refTDNightDosage",
+    "refTDNightDosageTime",
+    "refTDDurationMonth",
+    "refTDDurationYear",
+    "refTDCreatedDate",
+    "createdAt",
+    "createdBy"
+  )
+values
+  (
+    $1,
+    $2,
+    $3,
+    $4,
+    $5,
+    $6,
+    $7,
+    $8,
+    $9,
+    $10,
+    $11,
+    $12,
+    $13,
+    $14,
+    $15,
+    $16,
+    $17,
+    $18,
+    $19
+  )
+  `;
+
+export const updateTreatmentDetails = `
+  UPDATE "public"."refTreatmentDetails"
+SET
+  "refTDMedName" = $1,
+  "refTDCat" = $2,
+  "refTDStrength" = $3,
+  "refTDROA" = $4,
+  "refTDRTF" = $5,
+  "refTDMorningDosage" = $6,
+  "refTDMorningDosageTime" = $7,
+  "refTDAfternoonDosage" = $8,
+  "refTDAfternoonDosageTime" = $9,
+  "refTDEveningDosage" = $10,
+  "refTDEveningDosageTime" = $11,
+  "refTDNightDosage" = $12,
+  "refTDNightDosageTime" = $13,
+  "refTDDurationMonth" = $14,
+  "refTDDurationYear" = $15,
+  "updatedAt" = $16,
+  "updatedBy" = $17 	
+WHERE
+  "refTDId" = $18;  
+  `;
+
 export const deleteTreatmentDetails = `
   DELETE FROM public."refTreatmentDetails" rtd
   USING public."refPatientMap" rpm, public."refDoctorMap" rdm
@@ -562,11 +633,11 @@ SELECT
   *
 FROM
   public."refTreatmentDetails" rtd
-  JOIN public."refPatientMap" rpm ON rpm."refPMId" = CAST(rtd."refPMId" AS INTEGER)
-  JOIN public."refDoctorMap" rdm ON rdm."refDMId" = CAST(rpm."refDoctorId" AS INTEGER)
+  LEFT JOIN public."refPatientMap" rpm ON rpm."refPMId" = CAST(NULLIF(rtd."refPMId", '') AS INTEGER)
+  LEFT JOIN public."refDoctorMap" rdm ON rdm."refDMId" = CAST(NULLIF(rpm."refDoctorId", '') AS INTEGER)
 WHERE
-  rpm."refPatientId" = $1
-  AND DATE (rtd."refTDCreatedDate") <= DATE ($2)
+  (rpm."refPatientId" = $1 OR rtd."refUserId" = $1)
+  AND (rtd."refPMId" IS NOT NULL AND rtd."refPMId" <> '' OR rtd."refUserId" = $1)
   `;
 
 export const insertInvestigationDetails = `
@@ -578,6 +649,8 @@ export const insertInvestigationDetails = `
     "refIVDCreatedDate",
     "refIVDDate",
     "refIVDScore",
+    "ref1hrs",
+    "ref2hrs",
     "refUserId",
     "refQCategoryId"
   )
@@ -590,16 +663,20 @@ values
     $5,
     $6,
     $7,
-    $8
+    $8,
+    $9,
+    $10
   )
     `;
 
 export const getInvestigationDetailsQuery = `
-    SELECT
+SELECT
     rivd."refIVDId" as id,
   rivd."refIVDDate" as date,
   rivd."refIVDScore" as number,
-  rivd."refIVDAccessData" as flag
+  rivd."refIVDAccessData" as flag,
+  rivd."ref1hrs" as "oneHour",
+  rivd.ref2hrs as "twoHours"
 FROM
   public."refInvestigationDetails" rivd
 WHERE
@@ -655,23 +732,26 @@ ORDER BY
   `;
 
 export const getPastInvestigation = `
-  SELECT
+SELECT
   *
-FROM (
-  SELECT
-    rivd."refIVDDate",
-    rivd."refIVDScore"
-  FROM
-    public."refInvestigationDetails" rivd
-  WHERE
-    rivd."refUserId" = $1 
-    AND rivd."refQCategoryId" = $2
-    AND rivd."refIVDDate"::date <= DATE($3)
-  ORDER BY
-    rivd."refIVDDate" DESC
-  LIMIT
-    5
-) AS subquery
+FROM
+  (
+    SELECT
+      rivd."refIVDDate",
+      rivd."refIVDScore",
+      rivd.ref1hrs,
+      rivd.ref2hrs
+    FROM
+      public."refInvestigationDetails" rivd
+    WHERE
+      rivd."refUserId" = $1
+      AND rivd."refQCategoryId" = $2
+      AND rivd."refIVDDate"::date <= DATE ($3)
+    ORDER BY
+      rivd."refIVDDate" DESC
+    LIMIT
+      5
+  ) AS subquery
 ORDER BY
   subquery."refIVDDate" ASC;
   `;
@@ -683,4 +763,21 @@ FROM
   public."refCommunication"
 WHERE
   "refUserMobileno" = $1
+  `;
+
+export const checkAgeQuery = `
+  SELECT * FROM public."Users" WHERE "refUserId" = $1
+  `;
+
+  export const diagosisCategory = `
+  SELECT
+  *
+FROM
+  public."refPatientTransaction" rpt
+  FULL JOIN public."refUserScoreDetail" rusd ON rusd."refPTId" = CAST(rpt."refPTId" AS TEXT)
+  FULL JOIN public."refPatientMap" rpm ON rpm."refPMId" = CAST(rpt."refPMId" AS INTEGER)
+WHERE
+  DATE(rpt."refPTcreatedDate") = DATE($1)
+  AND rpm."refPatientId" = $2
+  AND rusd."refQCategoryId" = $3
   `;

@@ -14,10 +14,16 @@ import {
   userParticularSiginQuery,
   usersigninQuery,
 } from "../Authentication/AuthenticationQuery";
+import {
+  communicationUpdateQuery,
+  getUserQuery,
+  userUpdateQuery,
+} from "./CommercialQuery";
 
 const DB = require("../../Helper/DBConncetion");
 const bcrypt = require("bcrypt");
 var jwt = require("jsonwebtoken");
+const logger = require("../../Helper/Logger");
 
 export const UserLoginModel = async (username: string, password: string) => {
   const connection = await DB();
@@ -47,6 +53,7 @@ export const UserLoginModel = async (username: string, password: string) => {
             message: "Signin Successfull",
             roleType: result.rows[0].refRoleId,
             users: result.rows,
+            isDetails: result.rows[0].refOccupationLvl === "-" ? true : false,
             token: accessToken,
           };
         } else
@@ -191,6 +198,72 @@ export const handleMultipleUserSigninModel = async (
     }
   } catch (error) {
     console.error("Something went Wrong", error);
+    throw error;
+  } finally {
+    await connection.end();
+  }
+};
+
+export const getUserModel = async (userId: any) => {
+  const connection = await DB();
+  try {
+    const values = [userId];
+    // console.log("values", values);
+
+    const result = await connection.query(getUserQuery, values);
+    // console.log("result", result);
+
+    return {
+      status: true,
+      result: result.rows,
+    };
+  } catch (error) {
+    console.error("Error in DB:", error);
+    throw error;
+  } finally {
+    await connection.end();
+  }
+};
+
+export const userUpdateModel = async (id: any, values: any) => {
+  const connection = await DB();
+
+  try {
+    const updateValues = [
+      values.refUserFname,
+      values.refUserLname,
+      values.refDOB,
+      values.refGender,
+      values.refMaritalStatus,
+      values.refEducation,
+      values.refOccupationLvl,
+      values.refSector,
+      values.activeStatus,
+      values.updatedBy,
+      id,
+    ];
+
+    const updateCommuniction = [
+      values.refUserEmail,
+      values.refAddress,
+      values.refDistrict,
+      values.refPincode,
+      id,
+    ];
+    console.log("updateValues", updateValues);
+    await connection.query(userUpdateQuery, updateValues);
+    // console.log('userupdate', userupdate)
+    await connection.query(communicationUpdateQuery, updateCommuniction);
+    // console.log('communicationUpdate', communicationUpdate)
+
+    return {
+      status: true,
+      message: "update user Successfull",
+      // userResult: userupdate.rows[0],
+      // communicationResult: communicationUpdate.rows,
+    };
+  } catch (error) {
+    logger.error(`User update failed for user ID: ${id}, Error: ${error}`);
     throw error;
   } finally {
     await connection.end();
