@@ -89,3 +89,29 @@ export const calculateDaysDifference = (date1, date2) => {
   const diffInDays = Math.ceil(diffInTime / (1000 * 60 * 60 * 24));
   return diffInDays;
 };
+
+export const calculateAgeAndSubtractTime = (input1, input2) => {
+  console.log(input1, input2);
+  const birthDate = new Date(input1.replace(" T", "T")); // Convert to Date object
+
+  const currentDate = new Date();
+
+  let age = currentDate.getFullYear() - birthDate.getFullYear();
+  const monthDifference = currentDate.getMonth() - birthDate.getMonth();
+
+  // Adjust age if birthday hasn't occurred yet this year
+  if (
+    monthDifference < 0 ||
+    (monthDifference === 0 && currentDate.getDate() < birthDate.getDate())
+  ) {
+    age--;
+  }
+
+  // Subtract input2 from age (assuming input2 is in years)
+  let resultAge = age - input2;
+
+  console.log(resultAge);
+
+  // Return the result
+  return resultAge;
+};

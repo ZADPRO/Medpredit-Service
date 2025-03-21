@@ -13,6 +13,8 @@ import {
   getPastReportPDFModel,
   getHomeScreenModel,
   getHomeScreenAssistantModel,
+  getTreatmentDetailsModel,
+  deleteTreatmentDetailModel,
 } from "../../Models/Doctor/DoctorModel";
 
 const checkPatientMapController = async (req, res) => {
@@ -145,24 +147,13 @@ const getReportPDFController = async (req, res) => {
       doctorId = req.userData.userid;
     }
 
-    // if (type === "currentReport") {
     const result = await getCurrentReportPDFModel(
       patientId,
-      reportDate,
+      reportDate, 
       doctorId
     );
 
     return res.status(200).json(encrypt(result, true));
-    // } else if (type === "pastReport") {
-    //   const result = await getPastReportPDFModel(
-    //     patientId,
-    //     refPMId,
-    //     fromDate,
-    //     toDate
-    //   );
-
-    //   return res.status(200).json(encrypt(result, true));
-    // }
   } catch (error) {
     logger.error(`Get Report PDF (getReportPDFController) Error: (${error})`);
     console.error("Something went Wrong");
@@ -198,6 +189,36 @@ const getHomeScreenAssistantController = async (req, res) => {
   }
 };
 
+const getTreatmentDetailsController = async (req, res) => {
+  try {
+    const { patientId } = req.body;
+
+    const result = await getTreatmentDetailsModel(patientId);
+    return res.status(200).json(encrypt(result, true));
+  } catch (error) {
+    logger.error(
+      `Get TreatmentDetails (getTreatmentDetailsController) Error: (${error})`
+    );
+    console.error("Something went Wrong");
+    return res.status(500).json({ error: "Something went Wrong" });
+  }
+};
+
+const deleteTreatmentDetailController = async (req, res) => {
+  try {
+    const { id } = req.body;
+
+    const result = await deleteTreatmentDetailModel(id);
+    return res.status(200).json(encrypt(result, true));
+  } catch (error) {
+    logger.error(
+      `Delete TreatmentDetail (deleteTreatmentDetailController) Error: (${error})`
+    );
+    console.error("Something went Wrong");
+    return res.status(500).json({ error: "Something went Wrong" });
+  }
+};
+
 module.exports = {
   checkPatientMapController,
   addPatientMapController,
@@ -207,4 +228,6 @@ module.exports = {
   getReportPDFController,
   getHomeScreenController,
   getHomeScreenAssistantController,
+  getTreatmentDetailsController,
+  deleteTreatmentDetailController,
 };

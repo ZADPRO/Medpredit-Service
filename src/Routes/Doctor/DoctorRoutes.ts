@@ -13,6 +13,8 @@ const {
   getReportPDFController,
   getHomeScreenController,
   getHomeScreenAssistantController,
+  getTreatmentDetailsController,
+  deleteTreatmentDetailController,
 } = require("../../Controller/Doctor/DoctorController");
 
 const DoctorRoutes = express.Router();
@@ -45,6 +47,18 @@ DoctorRoutes.post(
   "/getHomeScreenDoctorAssistant",
   verifyToken,
   getHomeScreenAssistantController
+);
+
+DoctorRoutes.post(
+  "/getTreatmentDetails",
+  verifyToken,
+  getTreatmentDetailsController
+);
+
+DoctorRoutes.post(
+  "/deleteTreatmentDetail",
+  verifyToken,
+  deleteTreatmentDetailController
 );
 
 export default DoctorRoutes;

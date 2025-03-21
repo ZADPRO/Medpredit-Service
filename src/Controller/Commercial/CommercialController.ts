@@ -1,10 +1,13 @@
 import { encrypt } from "../../Helper/Encryption";
 import { CurrentTime } from "../../Helper/CurrentTime";
 import {
+  getUserModel,
   handleMultipleUserSigninModel,
   UserLoginModel,
   UserSignUpModel,
+  userUpdateModel,
 } from "../../Models/Commercial/CommercialModels";
+import { AbstractKeyword } from "typescript";
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const logger = require("../../Helper/Logger");
@@ -12,8 +15,6 @@ const logger = require("../../Helper/Logger");
 const UserLoginController = async (req, res) => {
   try {
     const { username, password } = req.body;
-
-    console.log("Hello");
 
     const result = await UserLoginModel(username, password);
 
@@ -115,8 +116,74 @@ const handleMultipleUserSigninController = async (req, res) => {
   }
 };
 
+const getUserController = async (req: any, res: any) => {
+  try {
+    const { userId } = req.body;
+
+    const result = await getUserModel(userId);
+    console.log("result", result);
+
+    logger.info(`User data (${userId})`);
+
+    return res.status(200).json(encrypt(result, true));
+  } catch (error) {
+    logger.error(`User list In Error: (${error})`);
+    console.error("Something went Wrong", error);
+    return res.status(500).json({ error: "Something went Wrong" + error });
+  }
+};
+
+const userUpdateController = async (req: any, res: any) => {
+  try {
+    const {
+      id,
+      refUserFname,
+      refUserLname,
+      refDOB,
+      refGender,
+      refMaritalStatus,
+      refEducation,
+      refOccupationLvl,
+      refSector,
+      activeStatus,
+      updatedBy,
+      refUserEmail,
+      refAddress,
+      refDistrict,
+      refPincode,
+    } = req.body;
+
+    const values = {
+      refUserFname,
+      refUserLname,
+      refDOB,
+      refGender,
+      refMaritalStatus,
+      refEducation,
+      refOccupationLvl,
+      refSector,
+      activeStatus,
+      updatedBy,
+      refUserEmail,
+      refAddress,
+      refDistrict,
+      refPincode,
+    };
+    const result = await userUpdateModel(id, values);
+    logger.info(`User update (${id})`);
+
+    return res.status(200).json(encrypt(result, true));
+  } catch (error) {
+    logger.error(`user update error: (${error})`);
+    console.error("Something went Wrong", error);
+    return res.status(500).json({ error: "Something went wrong" + error });
+  }
+};
+
 module.exports = {
   UserLoginController,
   UserSignUpController,
   handleMultipleUserSigninController,
+  getUserController,
+  userUpdateController,
 };

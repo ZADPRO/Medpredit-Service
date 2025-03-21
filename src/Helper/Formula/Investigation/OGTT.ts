@@ -7,6 +7,8 @@ export const OGTT = (answers: any) => {
   value.push({
     date: isoDate,
     number: answers.find((item) => item.questionId === 278).answer,
+    oneHour: answers.find((item) => item.questionId === 279).answer,
+    twoHours: answers.find((item) => item.questionId === 280).answer,
     flag: "db",
   });
 

@@ -7,6 +7,7 @@ export const GCT = (answers: any) => {
   value.push({
     date: isoDate,
     number: answers.find((item) => item.questionId === 284).answer,
+    twoHours: answers.find((item) => item.questionId === 285).answer,
     flag: "db",
   });
 

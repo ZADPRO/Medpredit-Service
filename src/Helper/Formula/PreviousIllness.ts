@@ -1,4 +1,6 @@
-export const PreviousIllness = (answers: any[]) => {
+import { calculateAgeAndSubtractTime } from "../CurrentTime";
+
+export const PreviousIllness = (answers: any[], age: any) => {
   answers.sort((a, b) => a.questionId - b.questionId);
 
   let systemic = "No";
@@ -117,10 +119,17 @@ export const PreviousIllness = (answers: any[]) => {
     if (systemic === "Yes") {
       if (element.questionId === 161) {
         systemicage = element.answer;
-      }
 
-      if (element.questionId === 162) {
-        systemicduration = element.answer;
+        const tempsystemicduration = calculateAgeAndSubtractTime(
+          age,
+          parseInt(systemicage)
+        );
+
+        if (tempsystemicduration === 0) {
+          systemicduration = "Recently Diagnosed";
+        } else {
+          systemicduration = tempsystemicduration + " Year";
+        }
       }
 
       if (element.questionId === 163) {
@@ -148,11 +157,22 @@ export const PreviousIllness = (answers: any[]) => {
     if (Diabetes === "Yes") {
       if (element.questionId === 169) {
         Diabetesage = element.answer;
+
+        const tempDiabetesduration = calculateAgeAndSubtractTime(
+          age,
+          parseInt(Diabetesage)
+        );
+
+        if (tempDiabetesduration === 0) {
+          Diabetesduration = "Recently Diagnosed";
+        } else {
+          Diabetesduration = tempDiabetesduration + " Year";
+        }
       }
 
-      if (element.questionId === 170) {
-        Diabetesduration = element.answer;
-      }
+      // if (element.questionId === 170) {
+      //   Diabetesduration = element.answer;
+      // }
 
       if (element.questionId === 171) {
         Diabetesdiagnosis = element.answer;
@@ -210,11 +230,22 @@ export const PreviousIllness = (answers: any[]) => {
     if (Bronchial === "Yes") {
       if (element.questionId === 185) {
         Bronchialage = element.answer;
+
+        const tempBronchialduration = calculateAgeAndSubtractTime(
+          age,
+          parseInt(Bronchialage)
+        );
+
+        if (tempBronchialduration === 0) {
+          Bronchialduration = "Recently Diagnosed";
+        } else {
+          Bronchialduration = tempBronchialduration + " Year";
+        }
       }
 
-      if (element.questionId === 186) {
-        Bronchialduration = element.answer;
-      }
+      // if (element.questionId === 186) {
+      //   Bronchialduration = element.answer;
+      // }
 
       if (element.questionId === 187) {
         Bronchialdiagnosis = element.answer;
@@ -241,11 +272,22 @@ export const PreviousIllness = (answers: any[]) => {
     if (Epilepsy === "Yes") {
       if (element.questionId === 193) {
         Epilepsyage = element.answer;
+
+        const tempEpilepsyduration = calculateAgeAndSubtractTime(
+          age,
+          parseInt(Epilepsyage)
+        );
+
+        if (tempEpilepsyduration === 0) {
+          Epilepsyduration = "Recently Diagnosed";
+        } else {
+          Epilepsyduration = tempEpilepsyduration + " Year";
+        }
       }
 
-      if (element.questionId === 194) {
-        Epilepsyduration = element.answer;
-      }
+      // if (element.questionId === 194) {
+      //   Epilepsyduration = element.answer;
+      // }
 
       if (element.questionId === 195) {
         Epilepsydiagnosis = element.answer;
@@ -272,11 +314,22 @@ export const PreviousIllness = (answers: any[]) => {
     if (Stroke === "Yes") {
       if (element.questionId === 201) {
         Strokeage = element.answer;
+
+        const tempStrokeduration = calculateAgeAndSubtractTime(
+          age,
+          parseInt(Strokeage)
+        );
+
+        if (tempStrokeduration === 0) {
+          Strokeduration = "Recently Diagnosed";
+        } else {
+          Strokeduration = tempStrokeduration + " Year";
+        }
       }
 
-      if (element.questionId === 202) {
-        Strokeduration = element.answer;
-      }
+      // if (element.questionId === 202) {
+      //   Strokeduration = element.answer;
+      // }
 
       if (element.questionId === 203) {
         Strokediagnosis = element.answer;
@@ -303,11 +356,22 @@ export const PreviousIllness = (answers: any[]) => {
     if (Artery === "Yes") {
       if (element.questionId === 209) {
         Arteryage = element.answer;
+
+        const tempArteryage = calculateAgeAndSubtractTime(
+          age,
+          parseInt(Arteryage)
+        );
+
+        if (tempArteryage === 0) {
+          Arteryduration = "Recently Diagnosed";
+        } else {
+          Arteryduration = tempArteryage + " Year";
+        }
       }
 
-      if (element.questionId === 210) {
-        Arteryduration = element.answer;
-      }
+      // if (element.questionId === 210) {
+      //   Arteryduration = element.answer;
+      // }
 
       if (element.questionId === 211) {
         Arterydiagnosis = element.answer;
@@ -334,11 +398,22 @@ export const PreviousIllness = (answers: any[]) => {
     if (Kidney === "Yes") {
       if (element.questionId === 217) {
         Kidneyage = element.answer;
+
+        const tempKidneyage = calculateAgeAndSubtractTime(
+          age,
+          parseInt(Kidneyage)
+        );
+
+        if (tempKidneyage === 0) {
+          Kidneyduration = "Recently Diagnosed";
+        } else {
+          Kidneyduration = tempKidneyage + " Year";
+        }
       }
 
-      if (element.questionId === 218) {
-        Kidneyduration = element.answer;
-      }
+      // if (element.questionId === 218) {
+      //   Kidneyduration = element.answer;
+      // }
 
       if (element.questionId === 219) {
         Kidneydiagnosis = element.answer;
@@ -365,11 +440,19 @@ export const PreviousIllness = (answers: any[]) => {
     if (hiv === "Yes") {
       if (element.questionId === 225) {
         hivage = element.answer;
+
+        const temphivage = calculateAgeAndSubtractTime(age, parseInt(hivage));
+
+        if (temphivage === 0) {
+          hivduration = "Recently Diagnosed";
+        } else {
+          hivduration = temphivage + " Year";
+        }
       }
 
-      if (element.questionId === 226) {
-        hivduration = element.answer;
-      }
+      // if (element.questionId === 226) {
+      //   hivduration = element.answer;
+      // }
 
       if (element.questionId === 227) {
         hivdiagnosis = element.answer;
@@ -397,11 +480,22 @@ export const PreviousIllness = (answers: any[]) => {
     if (Transplant === "Yes") {
       if (element.questionId === 233) {
         Transplantage = element.answer;
+
+        const tempTransplantage = calculateAgeAndSubtractTime(
+          age,
+          parseInt(Transplantage)
+        );
+
+        if (tempTransplantage === 0) {
+          Transplantduration = "Recently Diagnosed";
+        } else {
+          Transplantduration = tempTransplantage + " Year";
+        }
       }
 
-      if (element.questionId === 234) {
-        Transplantduration = element.answer;
-      }
+      // if (element.questionId === 234) {
+      //   Transplantduration = element.answer;
+      // }
 
       if (element.questionId === 235) {
         Transplantdiagnosis = element.answer;
@@ -428,11 +522,22 @@ export const PreviousIllness = (answers: any[]) => {
     if (Cancer === "Yes") {
       if (element.questionId === 241) {
         Cancerage = element.answer;
+
+        const tempCancerage = calculateAgeAndSubtractTime(
+          age,
+          parseInt(Cancerage)
+        );
+
+        if (tempCancerage === 0) {
+          Cancerduration = "Recently Diagnosed";
+        } else {
+          Cancerduration = tempCancerage + " Year";
+        }
       }
 
-      if (element.questionId === 242) {
-        Cancerduration = element.answer;
-      }
+      // if (element.questionId === 242) {
+      //   Cancerduration = element.answer;
+      // }
 
       if (element.questionId === 243) {
         Cancerdiagnosis = element.answer;
@@ -459,11 +564,22 @@ export const PreviousIllness = (answers: any[]) => {
     if (Thyroid === "Yes") {
       if (element.questionId === 249) {
         Thyroidage = element.answer;
+
+        const tempThyroidage = calculateAgeAndSubtractTime(
+          age,
+          parseInt(Thyroidage)
+        );
+
+        if (tempThyroidage === 0) {
+          Thyroidduration = "Recently Diagnosed";
+        } else {
+          Thyroidduration = tempThyroidage + " Year";
+        }
       }
 
-      if (element.questionId === 250) {
-        Thyroidduration = element.answer;
-      }
+      // if (element.questionId === 250) {
+      //   Thyroidduration = element.answer;
+      // }
 
       if (element.questionId === 251) {
         Thyroiddiagnosis = element.answer;
@@ -490,11 +606,22 @@ export const PreviousIllness = (answers: any[]) => {
     if (chronic === "Yes") {
       if (element.questionId === 257) {
         chronicage = element.answer;
+
+        const tempchronicage = calculateAgeAndSubtractTime(
+          age,
+          parseInt(chronicage)
+        );
+
+        if (tempchronicage === 0) {
+          chronicduration = "Recently Diagnosed";
+        } else {
+          chronicduration = tempchronicage + " Year";
+        }
       }
 
-      if (element.questionId === 258) {
-        chronicduration = element.answer;
-      }
+      // if (element.questionId === 258) {
+      //   chronicduration = element.answer;
+      // }
 
       if (element.questionId === 259) {
         chronicdiagnosis = element.answer;

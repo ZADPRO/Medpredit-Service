@@ -253,10 +253,11 @@ SELECT
   *
 FROM
   public."refTreatmentDetails" rtd
-  JOIN public."refPatientMap" rpm ON rpm."refPMId" = CAST(rtd."refPMId" AS INTEGER)
+  LEFT JOIN public."refPatientMap" rpm ON rpm."refPMId" = CAST(NULLIF(rtd."refPMId", '') AS INTEGER)
+  LEFT JOIN public."refDoctorMap" rdm ON rdm."refDMId" = CAST(NULLIF(rpm."refDoctorId", '') AS INTEGER)
 WHERE
-  rpm."refPatientId" = $1
-  AND rtd."refTDCreatedDate"::DATE = CAST($2 AS DATE)
+  (rpm."refPatientId" = $1 OR rtd."refUserId" = $1)
+  AND (rtd."refPMId" IS NOT NULL AND rtd."refPMId" <> '' OR rtd."refUserId" = $1)
   `;
 
 export const checkCreateReport = `
@@ -324,4 +325,8 @@ WHERE
   AND DATE (rpt."refPTcreatedDate") >= ($2)
   AND DATE (rpt."refPTcreatedDate") <= DATE ($3)
   AND rusd."refQCategoryId" = $4
+  `;
+
+  export const deleteTreatmentDetail = `
+  DELETE FROM public."refTreatmentDetails" WHERE "refTDId" = $1
   `;
