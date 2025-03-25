@@ -284,8 +284,10 @@ SELECT DISTINCT
   ) AS refPTcreatedDate
 FROM
   public."refPatientTransaction" rpt
-  JOIN public."refPatientMap" rpm ON rpm."refPMId" = CAST(rpt."refPMId" AS INTEGER)
-  WHERE rpm."refPatientId" = $1
+  LEFT JOIN public."refPatientMap" rpm ON rpm."refPMId" = CAST(rpt."refPMId" AS INTEGER)
+WHERE
+  rpm."refPatientId" = $1
+  OR rpt."refUserId" = $1
 ORDER BY
   refPTcreatedDate DESC;
 `;
