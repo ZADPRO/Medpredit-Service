@@ -1,10 +1,14 @@
-export const getPatientDataQuery = `SELECT
+export const getPatientDataQuery = `
+SELECT
   *
 FROM
   public."refCommunication" rc
   JOIN public."Users" u ON u."refUserId" = rc."refUserId"
 WHERE
-  rc."refUserMobileno" = $1 AND u."refRoleId" = 3`;
+  rc."refUserMobileno" = $1
+  AND u."refRoleId" = 3
+  AND u."activeStatus" = 'active'
+`;
 
 export const nextUserId = `
 SELECT 
@@ -37,10 +41,11 @@ export const postNewUser = `
     "refSector",
     "activeStatus",
     "createdAt",
-    "createdBy"
+    "createdBy",
+    "headStatus"
   )
 VALUES
-  ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+  ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
 `;
 
 export const getUserId = `
@@ -771,7 +776,7 @@ export const checkAgeQuery = `
   SELECT * FROM public."Users" WHERE "refUserId" = $1
   `;
 
-  export const diagosisCategory = `
+export const diagosisCategory = `
   SELECT
   *
 FROM

@@ -11,10 +11,13 @@ import {
   postnewUserDomain,
 } from "../Assistant/AssistantQuery";
 import {
+  postActiveQuery,
   userParticularSiginQuery,
   usersigninQuery,
 } from "../Authentication/AuthenticationQuery";
 import {
+  changeHeadUserQuery,
+  changeUserpostActiveQuery,
   communicationUpdateQuery,
   getUserQuery,
   userUpdateQuery,
@@ -109,6 +112,7 @@ export const UserSignUpModel = async (values: any) => {
         "active",
         values.createdAt,
         values.createdBy,
+        "true",
       ];
 
       await connection.query(postNewUser, newUservaluesInsert);
@@ -264,6 +268,74 @@ export const userUpdateModel = async (id: any, values: any) => {
     };
   } catch (error) {
     logger.error(`User update failed for user ID: ${id}, Error: ${error}`);
+    throw error;
+  } finally {
+    await connection.end();
+  }
+};
+
+export const deleteMultipleUserModel = async (
+  id: any,
+  updatedAt: any,
+  updatedBy: any
+) => {
+  const connection = await DB();
+
+  try {
+    await Promise.all(
+      id.map((element: any) =>
+        connection.query(postActiveQuery, [
+          "inactive",
+          updatedAt,
+          updatedBy,
+          element,
+        ])
+      )
+    );
+
+    return {
+      status: true,
+    };
+  } catch (error) {
+    logger.error(
+      `All user Delete Fail (deleteMultipleUserModel) : ${id}, Error: ${error}`
+    );
+    throw error;
+  } finally {
+    await connection.end();
+  }
+};
+
+export const changeUserIdModel = async (
+  id: any,
+  headUserId: any,
+  updatedAt: any,
+  updatedBy: any
+) => {
+  const connection = await DB();
+  try {
+    //Delete the User
+    await connection.query(changeUserpostActiveQuery, [
+      "inactive",
+      updatedAt,
+      updatedBy,
+      "false",
+      id,
+    ]);
+
+    // Change the Head User
+    await connection.query(changeHeadUserQuery, [
+      "true",
+      updatedAt,
+      updatedBy,
+      headUserId,
+    ]);
+
+    return {
+      status: true,
+    };
+  } catch (error) {
+    logger.error(`Changr the User and Delete: ${id}, Error: ${error}`);
     throw error;
   } finally {
     await connection.end();

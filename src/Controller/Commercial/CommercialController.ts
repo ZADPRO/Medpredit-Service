@@ -1,6 +1,8 @@
 import { encrypt } from "../../Helper/Encryption";
 import { CurrentTime } from "../../Helper/CurrentTime";
 import {
+  changeUserIdModel,
+  deleteMultipleUserModel,
   getUserModel,
   handleMultipleUserSigninModel,
   UserLoginModel,
@@ -180,10 +182,58 @@ const userUpdateController = async (req: any, res: any) => {
   }
 };
 
+const deleteMultipleUserController = async (req: any, res: any) => {
+  try {
+    const { id } = req.body;
+
+    console.log(id, req.userData);
+
+    const updatedAt = CurrentTime();
+    const updatedBy = req.userData.userid;
+
+    const result = await deleteMultipleUserModel(id, updatedAt, updatedBy);
+    logger.info(`All User Deleted (deleteMultipleUserController) (${id})`);
+
+    return res.status(200).json(encrypt(result, true));
+  } catch (error) {
+    logger.error(`user update error: (${error})`);
+    console.error("Something went Wrong", error);
+    return res.status(500).json({ error: "Something went wrong" + error });
+  }
+};
+
+const changeUserIdController = async (req, res) => {
+  try {
+    const { id, headUserId } = req.body;
+
+    const updatedAt = CurrentTime();
+    const updatedBy = req.userData.userid;
+
+    const result = await changeUserIdModel(
+      id,
+      headUserId,
+      updatedAt,
+      updatedBy
+    );
+
+    logger.info(
+      `Delete User And Assign new User (changeUserIdController) (${id})`
+    );
+
+    return res.status(200).json(encrypt(result, true));
+  } catch (error) {
+    logger.error(`user update error: (${error})`);
+    console.error("Something went Wrong", error);
+    return res.status(500).json({ error: "Something went wrong" + error });
+  }
+};
+
 module.exports = {
   UserLoginController,
   UserSignUpController,
   handleMultipleUserSigninController,
   getUserController,
   userUpdateController,
+  deleteMultipleUserController,
+  changeUserIdController,
 };

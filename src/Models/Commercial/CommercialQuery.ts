@@ -10,8 +10,6 @@ WHERE
 
 `;
 
-
-
 export const userUpdateQuery = `
 UPDATE public."Users"
 SET
@@ -30,7 +28,7 @@ WHERE "refUserId" = $11
 RETURNING *;
 `;
 
-export const communicationUpdateQuery =`UPDATE public."refCommunication"
+export const communicationUpdateQuery = `UPDATE public."refCommunication"
 SET
   "refUserEmail" = $1,
   "refAddress" = $2,
@@ -39,4 +37,27 @@ SET
   
 WHERE "refUserId" = $5
 RETURNING *;
+`;
+
+export const changeUserpostActiveQuery = `
+UPDATE
+  public."Users" 
+SET
+  "activeStatus" = $1,
+  "updatedAt" = $2,
+  "updatedBy" = $3,
+  "headStatus" = $4
+WHERE
+  "refUserId" = $5
+`;
+
+export const changeHeadUserQuery = `
+UPDATE
+  public."Users"
+SET
+  "headStatus" = $1,
+  "updatedAt" = $2,
+  "updatedBy" = $3
+  WHERE 
+  "refUserId" = $4
 `;

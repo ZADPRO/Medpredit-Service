@@ -1,11 +1,17 @@
 import express from "express";
 
 const {
+  verifyToken,
+} = require("../../Controller/Authentication/AuthenticationControllers");
+
+const {
   UserLoginController,
   UserSignUpController,
   handleMultipleUserSigninController,
   getUserController,
-  userUpdateController
+  userUpdateController,
+  deleteMultipleUserController,
+  changeUserIdController,
 } = require("../../Controller/Commercial/CommercialController");
 
 const CommercialRoutes = express.Router();
@@ -16,12 +22,20 @@ CommercialRoutes.post("/usersignup", UserSignUpController);
 
 CommercialRoutes.post(
   "/handleMultipleUserSignin",
+  verifyToken,
   handleMultipleUserSigninController
 );
 
-CommercialRoutes.post("/getUsers", getUserController);
+CommercialRoutes.post("/getUsers", verifyToken, getUserController);
 
-CommercialRoutes.post("/userupdate", userUpdateController);
+CommercialRoutes.post("/userupdate", verifyToken, userUpdateController);
 
+CommercialRoutes.post(
+  "/deleteMultipleUser",
+  verifyToken,
+  deleteMultipleUserController
+);
+
+CommercialRoutes.post("/changeUserId", verifyToken, changeUserIdController);
 
 export default CommercialRoutes;

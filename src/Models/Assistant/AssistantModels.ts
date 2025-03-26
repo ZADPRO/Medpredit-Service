@@ -141,6 +141,7 @@ export const postNewPatientModels = async (values: any) => {
         "active",
         values.createdAt,
         values.createdBy,
+        "true",
       ];
 
       await connection.query(postNewUser, newUservaluesInsert);
@@ -1103,6 +1104,7 @@ export const postFamilyUserModel = async (values: any) => {
       "active",
       createdAt,
       values.doctorId,
+      "false",
     ];
 
     await connection.query(postNewUser, newUservaluesInsert);
