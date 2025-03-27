@@ -8,6 +8,7 @@ WHERE
   rc."refUserMobileno" = $1
   AND u."refRoleId" = 3
   AND u."activeStatus" = 'active'
+  ORDER BY u."refUserId" ASC
 `;
 
 export const nextUserId = `
