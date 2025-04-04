@@ -3,6 +3,7 @@ import { CurrentTime } from "../../Helper/CurrentTime";
 import {
   changeUserIdModel,
   deleteMultipleUserModel,
+  getAllValidPackageModel,
   getUserModel,
   handleMultipleUserSigninModel,
   UserLoginModel,
@@ -228,6 +229,22 @@ const changeUserIdController = async (req, res) => {
   }
 };
 
+const getAllValidPackageController = async (req, res) => {
+  try {
+    const currentTime = CurrentTime();
+
+    const result = await getAllValidPackageModel(currentTime);
+
+    return res.status(200).json(encrypt(result, true));
+  } catch (error) {
+    logger.error(
+      `Get All Valid Package (getAllValidPackageController): (${error})`
+    );
+    console.error("Something went Wrong", error);
+    return res.status(500).json({ error: "Something went wrong" + error });
+  }
+};
+
 module.exports = {
   UserLoginController,
   UserSignUpController,
@@ -236,4 +253,5 @@ module.exports = {
   userUpdateController,
   deleteMultipleUserController,
   changeUserIdController,
+  getAllValidPackageController,
 };

@@ -61,3 +61,13 @@ SET
   WHERE 
   "refUserId" = $4
 `;
+
+export const getAllValidPackageQuery = `
+SELECT
+  *
+FROM
+  public."refPackages" rp
+WHERE
+  rp."refPkgStatus" IS TRUE
+  AND CAST(rp."refPkgEndDate" AS DATE) >= CAST($1 AS DATE)
+`;

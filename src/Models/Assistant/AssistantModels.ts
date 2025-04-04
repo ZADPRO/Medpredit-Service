@@ -15,6 +15,7 @@ import { Vitals } from "../../Helper/Formula/Vitals";
 const logger = require("../../Helper/Logger");
 import {
   addPatientIdTransactionQuery,
+  addRelationQuery,
   checkAgeQuery,
   checkMobileNumberQuery,
   deleteTreatmentDetailQuery,
@@ -172,6 +173,14 @@ export const postNewPatientModels = async (values: any) => {
       ];
 
       await connection.query(postnewUserDomain, newUserDomainValue);
+
+      //addRelation
+      await connection.query(addRelationQuery, [
+        getOverallId.rows[0].overAllId,
+        values.refUserMobileno,
+        "Family History",
+        true,
+      ]);
 
       return {
         status: true,
@@ -1133,6 +1142,14 @@ export const postFamilyUserModel = async (values: any) => {
     ];
 
     await connection.query(postnewUserDomain, newUserDomainValue);
+
+    //addRelation
+    await connection.query(addRelationQuery, [
+      getOverallId.rows[0].overAllId,
+      values.refUserMobileno,
+      "Family History",
+      true,
+    ]);
 
     return {
       status: true,

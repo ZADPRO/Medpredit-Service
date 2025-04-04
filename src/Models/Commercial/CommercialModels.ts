@@ -19,6 +19,7 @@ import {
   changeHeadUserQuery,
   changeUserpostActiveQuery,
   communicationUpdateQuery,
+  getAllValidPackageQuery,
   getUserQuery,
   userUpdateQuery,
 } from "./CommercialQuery";
@@ -336,6 +337,25 @@ export const changeUserIdModel = async (
     };
   } catch (error) {
     logger.error(`Changr the User and Delete: ${id}, Error: ${error}`);
+    throw error;
+  } finally {
+    await connection.end();
+  }
+};
+
+export const getAllValidPackageModel = async (currentDate: any) => {
+  const connection = await DB();
+  try {
+    const result = await connection.query(getAllValidPackageQuery, [
+      currentDate,
+    ]);
+
+    return {
+      result: result.rows,
+      status: true,
+    };
+  } catch (error) {
+    logger.error(`Getting the Package for user, Error: ${error}`);
     throw error;
   } finally {
     await connection.end();

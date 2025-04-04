@@ -12,6 +12,7 @@ const {
   userUpdateController,
   deleteMultipleUserController,
   changeUserIdController,
+  getAllValidPackageController,
 } = require("../../Controller/Commercial/CommercialController");
 
 const CommercialRoutes = express.Router();
@@ -37,5 +38,11 @@ CommercialRoutes.post(
 );
 
 CommercialRoutes.post("/changeUserId", verifyToken, changeUserIdController);
+
+CommercialRoutes.post(
+  "/getAllValidPackage",
+  verifyToken,
+  getAllValidPackageController
+);
 
 export default CommercialRoutes;

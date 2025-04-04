@@ -789,3 +789,15 @@ WHERE
   AND rpm."refPatientId" = $2
   AND rusd."refQCategoryId" = $3
   `;
+
+export const addRelationQuery = `
+INSERT INTO
+  public."refRelation" (
+    "refUserId",
+    "refRHeadMobileNo",
+    "refRName",
+    "refRStatus"
+  )
+VALUES
+  ($1, $2, $3, $4);
+  `;
