@@ -1,5 +1,6 @@
 import { getDateOnly } from "../../Helper/CurrentTime";
 import {
+  addRelationQuery,
   checkMobileNumberQuery,
   getUserId,
   nextUserId,
@@ -520,6 +521,14 @@ export const signUpDoctorsModels = async (values: any) => {
       ];
 
       await connection.query(postnewUserDomain, newUserDomainValue);
+
+      //addRelation
+      await connection.query(addRelationQuery, [
+        getOverallId.rows[0].overAllId,
+        values.refUserMobileno,
+        "Family History",
+        true,
+      ]);
 
       return {
         status: true,
