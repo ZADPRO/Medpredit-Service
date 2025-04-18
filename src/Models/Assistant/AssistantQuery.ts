@@ -90,13 +90,16 @@ INSERT INTO public."refUserDomain" (
 );
 `;
 
-export const getMainCategoryQuery = `SELECT
+export const getMainCategoryQuery = `
+SELECT
  rct."refQCategoryId",
  rct."refCategoryLabel"
 FROM
   public."refCategory" rct
 WHERE
-  rct."refQSubCategory" = '0'`;
+  rct."refQSubCategory" = '0'
+  AND rct."refLanCode" = $1
+  `;
 
 export const getSubMainCategoryQuery = `
 SELECT
@@ -105,7 +108,9 @@ SELECT
 FROM
   public."refCategory" rct
 WHERE
-  rct."refQSubCategory" = $1`;
+  rct."refQSubCategory" = $1
+  AND rct."refLanCode" = $2
+  `;
 
 export const getFirstQuestionQuery = `
 SELECT
@@ -114,14 +119,23 @@ FROM
   public."refQuestions" ro
 WHERE
   ro."refQCategoryId" = $1
+  AND ro."refLanCode" = $2
 ORDER BY
-  ro."refQId"
+ro."refPQId"
 `;
 
 export const getOptions = `
-SELECT ro."refOptionId", ro."refOptionLabel", ro."forwardQId", ro."backwardQId", ro."refOptionMark"
-FROM public."refOptions" ro 
-WHERE ro."refOptionId" = ANY($1);
+SELECT
+  ro."refOptionId",
+  ro."refOptionLabel",
+  ro."forwardQId",
+  ro."backwardQId",
+  ro."refOptionMark"
+FROM
+  public."refOptions" ro
+WHERE
+  ro."refOptionId" = ANY ($1)
+  AND ro."refLanCode" = $2;
 `;
 
 export const getAnswers = `
@@ -416,9 +430,10 @@ export const getUserScoreVerifyQuery = `
 SELECT
   *
 FROM
-  public."refUserScoreVerify" rusv
+  public."refUserScoreVerify"
 WHERE
-  rusv."refQCategoryId" = $1
+  "refQCategoryId" = $1
+  AND "refLanCode" = $2
 `;
 
 export const getProfileQuery = `
