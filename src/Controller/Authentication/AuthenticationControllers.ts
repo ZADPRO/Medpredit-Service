@@ -110,7 +110,7 @@ const changeMobileNumberController = async (req, res) => {
 
 
     console.log(newMobileno, password, roleId);
-    
+
 
     const result = await ChangeMobileNumberModel(
       req.userData.userid,
@@ -256,13 +256,14 @@ const addAssistantMapController = async (req, res) => {
     const createdAt = CurrentTime();
     const createdBy = req.userData.userid;
 
-    const { doctorId, assistantId } = req.body;
+    const { doctorId, assistantId, hospitalId } = req.body;
 
     const result = await addAssistantMapModels(
       doctorId,
       assistantId,
       createdAt,
-      createdBy
+      createdBy,
+      hospitalId
     );
 
     logger.info(
@@ -282,10 +283,11 @@ const postActiveStatusController = async (req, res) => {
     const updatedAt = CurrentTime();
     const updatedBy = req.userData.userid;
 
-    const { doctorId, value } = req.body;
+    const { doctorId, value, hospitalId } = req.body;
 
     const result = await postActiveStatus(
       doctorId,
+      hospitalId,
       value,
       updatedAt,
       updatedBy

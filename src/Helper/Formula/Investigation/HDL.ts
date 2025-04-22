@@ -9,17 +9,17 @@ export const HDLScore = (
     return { score: [], investigationData: [] };
   }
 
-  const data = answers.find((item) => item.questionId === previousValue);
+  const data = answers.find((item) => item.questionId === previousValue.toString());
   if (!data) {
     console.error("No data found for previousValue:", previousValue);
     return { score: [], investigationData: [] };
   }
 
   const currentAnswer = answers.find(
-    (item) => item.questionId === currentValue
+    (item) => item.questionId === currentValue.toString()
   );
   if (!currentAnswer) {
-    console.error("No data found for currentValue:", currentValue);
+    console.error("No data found for currentValue:", currentValue.toString());
     return { score: [], investigationData: [] };
   }
 

@@ -4,10 +4,10 @@ export const SingleSelectValues = (
   previousValue: any,
   currentValue: any
 ) => {
-  const data = answers.find((item) => item.questionId === previousValue);
+  const data = answers.find((item) => item.questionId === previousValue.toString());
   let value = Array.isArray(data.answer) ? data.answer : [];
 
-  let answer = answers.find((item) => item.questionId === currentValue).answer;
+  let answer = answers.find((item) => item.questionId === currentValue.toString()).answer;
 
   const currentDate = new Date();
   const isoDate = currentDate.toISOString();

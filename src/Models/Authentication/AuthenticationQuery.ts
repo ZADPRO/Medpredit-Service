@@ -121,26 +121,34 @@ WHERE
   AND u."refUserId" = $1;`;
 
 export const assistantMapping = `
-  SELECT
+SELECT
+  ram."refAMRoleId",
   rh."refHospitalId"
 FROM
-  public."refAssMap" ram
-  JOIN public."refDoctorMap" rdm ON rdm."refDMId" = CAST(ram."refDoctorId" AS INTEGER)
-  JOIN public."refHospital" rh ON rh."refHospitalId" = CAST(rdm."refHospitalId" AS INTEGER)
+  public."Users" u
+  JOIN public."refAssMap" ram ON ram."refAssId" = CAST(u."refUserId" AS TEXT)
+  JOIN public."refHospital" rh ON rh."refHospitalId" = CAST(ram."refHospitalId" AS INTEGER)
 WHERE
-  ram."refAssId" = $1
+  u."refUserId" = $1
+  AND u."activeStatus" = 'active'
+  AND u."headStatus" = 'true'
+  AND ram."refAMStatus" = 'true'
   `;
 
 export const checkDoctorHospitalQuery = `
- SELECT
-  rdm."refHospitalId",
-  rh."refHospitalName",
-  rh."refHospitalAddress" || ', ' || rh."refHospitalPincode" AS "FullAddress"
+SELECT
+  *
 FROM
   public."refDoctorMap" rdm
+  JOIN public."Users" u ON u."refUserId" = CAST(rdm."refDoctorId" AS INTEGER)
+  JOIN public."refCommunication" rc ON rc."refUserId" = CAST(u."refUserId" AS INTEGER)
+  JOIN public."refUserDomain" rud ON rud."refUserId" = CAST(u."refUserId" AS INTEGER)
   JOIN public."refHospital" rh ON rh."refHospitalId" = CAST(rdm."refHospitalId" AS INTEGER)
 WHERE
-  rdm."refDoctorId" = $1;
+  rc."refUserMobileno" = $1
+  AND u."activeStatus" = 'active'
+  AND u."headStatus" = 'true'
+  AND rdm."refDMStatus" = 'true'
   `;
 
 export const changePasswordQuery = `
@@ -193,7 +201,7 @@ SELECT DISTINCT
   (
     'Dr. ' || u."refUserFname" || ' ' || u."refUserLname"
   ) AS "name",
-  u."activeStatus",
+  rdm."refDMStatus" AS "activeStatus",
   u."refUserId" AS "Id"
 FROM
   public."Users" u
@@ -210,7 +218,7 @@ SELECT DISTINCT
   (
     'Dr. ' || u."refUserFname" || ' ' || u."refUserLname"
   ) AS "name",
-  u."activeStatus",
+  rdm."refDMStatus" AS "activeStatus",
   u."refUserId" AS "Id"
 FROM
   public."Users" u
@@ -218,7 +226,7 @@ FROM
 WHERE
   u."refRoleId" IN ('1', '4')
   AND rdm."refHospitalId" = $1
-  AND u."activeStatus" = 'active'
+  AND rdm."refDMStatus" = 'true'
 `;
 
 export const getAssistantList = `
@@ -234,6 +242,22 @@ WHERE
   u."refRoleId" = $1
   AND rdm."refHospitalId" = $2
   AND u."activeStatus" = 'active'
+ORDER BY
+  ram."refAssId";
+`;
+
+export const getAllAssistantList = `
+SELECT DISTINCT
+  ON (ram."refAssId") u."refUserId" AS "code",
+  (u."refUserFname" || ' ' || u."refUserLname") AS "name",
+  u."refUserCustId"
+FROM
+  public."Users" u
+  JOIN public."refAssMap" ram ON ram."refAssId" = CAST(u."refUserId" AS TEXT)
+  JOIN public."refDoctorMap" rdm ON rdm."refDMId" = CAST(ram."refDoctorId" AS INTEGER)
+WHERE
+  u."refRoleId" = $1
+  AND rdm."refHospitalId" = $2
 ORDER BY
   ram."refAssId";
 `;
@@ -367,15 +391,16 @@ VALUES
 `;
 
 export const addStaffDoctorMap = `
-INSERT INTO
-  public."refDoctorMap" (
-    "refHospitalId",
-    "refDoctorId",
-    "CreatedAt",
-    "CreatedBy"
-  )
-VALUES
-  ($1, $2, $3, $4)
+INSERT INTO public."refDoctorMap" (
+  "refHospitalId",
+  "refDoctorId",
+  "CreatedAt",
+  "CreatedBy",
+  "refDMRoleId",
+  "refDMStatus"
+) 
+VALUES ($1, $2, $3, $4, $5, $6)
+RETURNING *;
 `;
 
 export const addStaffAssistantMap = `
@@ -384,10 +409,13 @@ INSERT INTO
     "refDoctorId",
     "refAssId",
     "CreatedAt",
-    "CreatedBy"
+    "CreatedBy",
+    "refAMRoleId",
+    "refAMStatus",
+    "refHospitalId"
   )
 VALUES
-  ($1, $2, $3, $4)
+  ($1, $2, $3, $4, $5, $6, $7)
 `;
 
 export const getDoctorMapList = `
@@ -418,13 +446,14 @@ WHERE
 `;
 
 export const postActiveQuery = `
-UPDATE public."Users"
+UPDATE public."refDoctorMap"
   SET 
-    "activeStatus" = $1,
-    "updatedAt" = $2,
-    "updatedBy" = $3
+    "refDMStatus" = $1,
+    "UpdatedAt" = $2,
+    "UpdatedBy" = $3
   WHERE 
-    "refUserId" = $4
+    "refDoctorId" = $4
+    AND "refHospitalId" = $5
 `;
 
 export const getUserActiveStatus = `

@@ -9,14 +9,14 @@ export const TC = (
     return { score: [], investigationData: [] };
   }
 
-  const data = answers.find((item) => item.questionId === previousValue);
+  const data = answers.find((item) => item.questionId === previousValue.toString());
   if (!data) {
-    console.error("No data found for previousValue:", previousValue);
+    console.error("No data found for previousValue:", previousValue.toString());
     return { score: [], investigationData: [] };
   }
 
   const currentAnswer = answers.find(
-    (item) => item.questionId === currentValue
+    (item) => item.questionId === currentValue.toString()
   );
   if (!currentAnswer) {
     console.error("No data found for currentValue:", currentValue);

@@ -14,6 +14,7 @@ import {
   addStaffDomainQuery,
   addStaffExprienceQuery,
   addStaffUserQuery,
+  getAllAssistantList,
   getAssistantList,
   getDetailsQuery,
   getDoctorList,
@@ -70,49 +71,43 @@ export const usersigninModel = async (username: string, password: string) => {
         ) {
           const checkDoctorHospital = await connection.query(
             checkDoctorHospitalQuery,
-            [result.rows[0].refUserId]
+            [username]
           );
 
           if (checkDoctorHospital.rows.length === 1) {
             return {
               status: true,
               message: "Signin Successfull",
-              roleType: result.rows[0].refRoleId,
-              hospitaId: checkDoctorHospital.rows[0].refHospitalId,
+              userData: checkDoctorHospital.rows,
               token: accessToken,
               action: "single",
+              roleId: result.rows[0].refRoleId
             };
           } else {
             return {
               status: true,
               message: "Signin Successfull",
-              roleType: result.rows[0].refRoleId,
-              hospitals: checkDoctorHospital.rows,
-              token: accessToken,
+              userData: checkDoctorHospital.rows,
               action: "multiple",
+              token: accessToken,
+              roleId: result.rows[0].refRoleId
             };
           }
         } else if (result.rows[0].refRoleId === 2) {
-          const hospitaId = await connection.query(assistantMapping, [
+          const userData = await connection.query(assistantMapping, [
             result.rows[0].refUserId,
           ]);
 
           return {
             status: true,
             message: "Signin Successfull",
-            roleType: result.rows[0].refRoleId,
-            hospitaId: hospitaId.rows[0].refHospitalId,
+            hospitalId: userData.rows[0].refHospitalId,
+            action: "single",
             token: accessToken,
+            roleId: parseInt(userData.rows[0].refAMRoleId)
           };
-        } else if (result.rows[0].refRoleId === 3) {
-          return {
-            status: true,
-            message: "Signin Successfull",
-            roleType: result.rows[0].refRoleId,
-            users: result.rows,
-            token: result.rows.length === 1 ? accessToken : null,
-            action: result.rows.length === 1 ? "single" : "multiple",
-          };
+        } else {
+          return { status: false, message: "Invalid Username or Password" };
         }
       } else {
         return { status: false, message: "Invalid Username or Password" };
@@ -370,6 +365,11 @@ export const getUserListModel = async (roleId, hospitalId) => {
       ]);
     } else if (roleId === "3") {
       getUserList = await connection.query(getDoctorList, [hospitalId]);
+    } else if (roleId === "4") {
+      getUserList = await connection.query(getAllAssistantList, [
+        2,
+        hospitalId,
+      ]);
     }
 
     return {
@@ -437,19 +437,24 @@ export const signUpDoctorsModels = async (values: any) => {
       // const getuseridVal = await connection.query(getUserId, [custId]);
 
       if (values.refRoleId === "1" || values.refRoleId === "4") {
-        await connection.query(addStaffDoctorMap, [
+        const doctorId = await connection.query(addStaffDoctorMap, [
           values.hospitalId,
           getOverallId.rows[0].overAllId,
           values.createdAt,
           values.createdBy,
+          values.refRoleId,
+          'true'
         ]);
 
         values.selectedUsers.map(async (element) => {
           await connection.query(addStaffAssistantMap, [
-            getOverallId.rows[0].overAllId,
+            doctorId.rows[0].refDMId,
             element.code,
             values.createdAt,
             values.createdBy,
+            2,
+            'true',
+            values.hospitalId
           ]);
         });
       } else if (values.refRoleId === "2") {
@@ -459,6 +464,9 @@ export const signUpDoctorsModels = async (values: any) => {
             getOverallId.rows[0].overAllId,
             values.createdAt,
             values.createdBy,
+            2,
+            'true',
+            values.hospitalId
           ]);
         });
       }
@@ -526,7 +534,7 @@ export const signUpDoctorsModels = async (values: any) => {
       await connection.query(addRelationQuery, [
         getOverallId.rows[0].overAllId,
         values.refUserMobileno,
-        "Family History",
+        "Head User",
         true,
       ]);
 
@@ -585,7 +593,8 @@ export const addAssistantMapModels = async (
   doctorId,
   assistantId,
   createdAt,
-  createdBy
+  createdBy,
+  hospitalId
 ) => {
   const connection = await DB();
   try {
@@ -594,6 +603,9 @@ export const addAssistantMapModels = async (
       assistantId,
       createdAt,
       createdBy,
+      2,
+      'true',
+      hospitalId
     ]);
 
     return {
@@ -609,6 +621,7 @@ export const addAssistantMapModels = async (
 
 export const postActiveStatus = async (
   doctorId,
+  hospitalId,
   value,
   updatedAt,
   updatedBy
@@ -621,6 +634,7 @@ export const postActiveStatus = async (
       updatedAt,
       updatedBy,
       doctorId,
+      hospitalId
     ]);
 
     return {

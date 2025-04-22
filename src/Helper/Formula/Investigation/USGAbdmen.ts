@@ -27,16 +27,16 @@ export const USGAbdmen = (answers: any, mappedResult: any) => {
   const isoDate = currentDate.toISOString();
 
   //Kidney Right
-  krvertical = answers.find((element) => element.questionId === 328)
-    ? answers.find((element) => element.questionId === 328).answer
+  krvertical = answers.find((element) => element.questionId === "328")
+    ? answers.find((element) => element.questionId === "328").answer
     : "";
 
-  krhorizontal = answers.find((element) => element.questionId === 329)
-    ? answers.find((element) => element.questionId === 329).answer
+  krhorizontal = answers.find((element) => element.questionId === "329")
+    ? answers.find((element) => element.questionId === "329").answer
     : "";
 
-  krthickness = answers.find((element) => element.questionId === 347)
-    ? answers.find((element) => element.questionId === 347).answer
+  krthickness = answers.find((element) => element.questionId === "347")
+    ? answers.find((element) => element.questionId === "347").answer
     : "";
 
   krpreviousvalue.push({
@@ -47,30 +47,30 @@ export const USGAbdmen = (answers: any, mappedResult: any) => {
     flag: "db",
   });
 
-  if (answers.find((element) => element.questionId === 330)) {
+  if (answers.find((element) => element.questionId === "330")) {
     answers
-      .find((element) => element.questionId === 330)
+      .find((element) => element.questionId === "330")
       .answer.forEach((element) => {
         krpreviousvalue.push(element);
       });
   }
   // krpreviousvalue.push(
-  //   answers.find((element) => element.questionId === 330)
+  //   answers.find((element) => element.questionId === "330")
   //     ?
   //     : null
   // );
 
   //Kidney Left
-  klvertical = answers.find((element) => element.questionId === 334)
-    ? answers.find((element) => element.questionId === 334).answer
+  klvertical = answers.find((element) => element.questionId === "334")
+    ? answers.find((element) => element.questionId === "334").answer
     : "";
 
-  klhorizontal = answers.find((element) => element.questionId === 335)
-    ? answers.find((element) => element.questionId === 335).answer
+  klhorizontal = answers.find((element) => element.questionId === "335")
+    ? answers.find((element) => element.questionId === "335").answer
     : "";
 
-  klthickness = answers.find((element) => element.questionId === 348)
-    ? answers.find((element) => element.questionId === 348).answer
+  klthickness = answers.find((element) => element.questionId === "348")
+    ? answers.find((element) => element.questionId === "348").answer
     : "";
 
   klpreviousvalue.push({
@@ -81,23 +81,23 @@ export const USGAbdmen = (answers: any, mappedResult: any) => {
     flag: "db",
   });
 
-  if (answers.find((element) => element.questionId === 336)) {
+  if (answers.find((element) => element.questionId === "336")) {
     answers
-      .find((element) => element.questionId === 336)
+      .find((element) => element.questionId === "336")
       .answer.forEach((element) => {
         klpreviousvalue.push(element);
       });
   }
 
   // klpreviousvalue.push(
-  //   answers.find((element) => element.questionId === 336)
-  //     ? answers.find((element) => element.questionId === 336).answer
+  //   answers.find((element) => element.questionId === "336")
+  //     ? answers.find((element) => element.questionId === "336").answer
   //     : null
   // );
 
   //Echogenicity
-  let echoCurrentValans = answers.find((element) => element.questionId === 338)
-    ? answers.find((element) => element.questionId === 338)
+  let echoCurrentValans = answers.find((element) => element.questionId === "338")
+    ? answers.find((element) => element.questionId === "338")
     : 0;
 
   echoCurrentVal = mappedResult
@@ -108,9 +108,9 @@ export const USGAbdmen = (answers: any, mappedResult: any) => {
 
   if (echoCurrentVal === "Increased") {
     let echoInwhichsideans = answers.find(
-      (element) => element.questionId === 339
+      (element) => element.questionId === "339"
     )
-      ? answers.find((element) => element.questionId === 339)
+      ? answers.find((element) => element.questionId === "339")
       : 0;
 
     echoInwhichside =
@@ -132,27 +132,27 @@ export const USGAbdmen = (answers: any, mappedResult: any) => {
     });
   }
 
-  if (answers.find((element) => element.questionId === 340)) {
+  if (answers.find((element) => element.questionId === "340")) {
     answers
-      .find((element) => element.questionId === 340)
+      .find((element) => element.questionId === "340")
       .answer.forEach((element) => {
         echopreviousvalue.push(element);
       });
   }
 
   // echopreviousvalue.push(
-  //   answers.find((element) => element.questionId === 340)
-  //     ? answers.find((element) => element.questionId === 340).answer
+  //   answers.find((element) => element.questionId === "340")
+  //     ? answers.find((element) => element.questionId === "340").answer
   //     : null
   // );
 
   // Cortico Medulary Differentiation
-  cortico = answers.find((element) => element.questionId === 350)
-    ? answers.find((element) => element.questionId === 350).answer
+  cortico = answers.find((element) => element.questionId === "350")
+    ? answers.find((element) => element.questionId === "350").answer
     : 0;
 
-  let corticoValans = answers.find((element) => element.questionId === 342)
-    ? answers.find((element) => element.questionId === 342)
+  let corticoValans = answers.find((element) => element.questionId === "342")
+    ? answers.find((element) => element.questionId === "342")
     : 0;
 
   corticoVal = mappedResult
@@ -163,9 +163,9 @@ export const USGAbdmen = (answers: any, mappedResult: any) => {
 
   if (corticoVal === "Distorted") {
     let corticoInWhichsideans = answers.find(
-      (element) => element.questionId === 343
+      (element) => element.questionId === "343"
     )
-      ? answers.find((element) => element.questionId === 343)
+      ? answers.find((element) => element.questionId === "343")
       : 0;
 
     corticoInWhichside = mappedResult
@@ -182,9 +182,9 @@ export const USGAbdmen = (answers: any, mappedResult: any) => {
     });
   } else if (corticoVal === "Poorly Differentiated") {
     let corticoInWhichsideans = answers.find(
-      (element) => element.questionId === 344
+      (element) => element.questionId === "344"
     )
-      ? answers.find((element) => element.questionId === 344)
+      ? answers.find((element) => element.questionId === "344")
       : 0;
 
     corticoInWhichside = mappedResult
@@ -208,17 +208,17 @@ export const USGAbdmen = (answers: any, mappedResult: any) => {
     });
   }
 
-  if (answers.find((element) => element.questionId === 345)) {
+  if (answers.find((element) => element.questionId === "345")) {
     answers
-      .find((element) => element.questionId === 345)
+      .find((element) => element.questionId === "345")
       .answer.forEach((element) => {
         corticopreviousvalue.push(element);
       });
   }
 
   // corticopreviousvalue.push(
-  //   answers.find((element) => element.questionId === 345)
-  //     ? answers.find((element) => element.questionId === 345).answer
+  //   answers.find((element) => element.questionId === "345")
+  //     ? answers.find((element) => element.questionId === "345").answer
   //     : null
   // );
 
