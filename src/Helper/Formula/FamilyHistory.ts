@@ -1,9 +1,6 @@
 export const FamilyHistory = (answers: any, mappedResult: any) => {
   answers.sort((a, b) => a.questionId - b.questionId);
 
-
-  console.log(answers, mappedResult)
-
   let result = [];
 
   answers.forEach((element, index) => {
