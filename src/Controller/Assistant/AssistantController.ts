@@ -126,8 +126,11 @@ const postFamilyUserController = async (req, res) => {
       refPincode,
       refUserMobileno,
       refGender,
+      isSame,
+      mobilenumber,
+      userpassword,
+      realtionType
     } = req.body;
-
     const doctorId = req.userData.userid;
     const branch = req.userData.branch ? req.userData.branch : "";
 
@@ -148,6 +151,10 @@ const postFamilyUserController = async (req, res) => {
       refGender,
       doctorId,
       branch,
+      isSame,
+      mobilenumber,
+      userpassword,
+      realtionType
     };
 
     const result = await postFamilyUserModel(values);

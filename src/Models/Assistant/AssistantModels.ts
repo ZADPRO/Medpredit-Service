@@ -13,8 +13,10 @@ import { Stress } from "../../Helper/Formula/Stress";
 import { Tabacco } from "../../Helper/Formula/Tobacco";
 import { Vitals } from "../../Helper/Formula/Vitals";
 const logger = require("../../Helper/Logger");
+const bcrypt = require("bcrypt");
 import {
   addPatientIdTransactionQuery,
+  addRelationFamilyQuery,
   addRelationQuery,
   checkAgeQuery,
   checkMobileNumberQuery,
@@ -1084,83 +1086,102 @@ export const postFamilyUserModel = async (values: any) => {
   const createdAt = CurrentTime();
 
   try {
-    const getPassword = await connection.query(getPasswordQuery, [
-      values.refUserId,
+
+    const checkMobileNumber = await connection.query(checkMobileNumberQuery, [
+      values.mobilenumber,
     ]);
 
-    const password = getPassword.rows[0].refUserPassword;
-    const hashedPassword = getPassword.rows[0].refUserHashedpass;
+    if (values.isSame ? true : checkMobileNumber.rows.length === 0) {
 
-    const nextUserIdData = await connection.query(nextUserId);
+      const getPassword = await connection.query(getPasswordQuery, [
+        values.refUserId,
+      ]);
 
-    await connection.query("BEGIN;");
+      const password = getPassword.rows[0].refUserPassword;
+      const hashedPassword = getPassword.rows[0].refUserHashedpass;
 
-    const patientId =
-      100000 +
-      parseInt(
-        nextUserIdData.rows[0].nextrefusercustid
-          ? nextUserIdData.rows[0].nextrefusercustid
-          : 1
-      );
+      const nextUserIdData = await connection.query(nextUserId);
 
-    const getOverallId = await connection.query(overAllId);
+      await connection.query("BEGIN;");
 
-    const newUservaluesInsert = [
-      getOverallId.rows[0].overAllId,
-      values.branch === "commercial" ? "USER" + patientId : "MED" + patientId,
-      "3",
-      values.refUserFname,
-      values.refUserLname,
-      values.refDOB,
-      values.refGender,
-      values.refMaritalStatus,
-      values.refEducation,
-      values.refProfession,
-      values.refSector,
-      "active",
-      createdAt,
-      values.doctorId,
-      "false",
-    ];
+      const patientId =
+        100000 +
+        parseInt(
+          nextUserIdData.rows[0].nextrefusercustid
+            ? nextUserIdData.rows[0].nextrefusercustid
+            : 1
+        );
 
-    await connection.query(postNewUser, newUservaluesInsert);
+      const getOverallId = await connection.query(overAllId);
 
-    // const getuseridVal = await connection.query(getUserId, ["MED" + patientId]);
+      const newUservaluesInsert = [
+        getOverallId.rows[0].overAllId,
+        values.branch === "commercial" ? "USER" + patientId : "MED" + patientId,
+        "3",
+        values.refUserFname,
+        values.refUserLname,
+        values.refDOB,
+        values.refGender,
+        values.refMaritalStatus,
+        values.refEducation,
+        values.refProfession,
+        values.refSector,
+        "active",
+        createdAt,
+        values.doctorId,
+        "false",
+      ];
 
-    const newrefCommunicationValue = [
-      getOverallId.rows[0].overAllId,
-      values.refUserMobileno,
-      values.refUserEmail,
-      values.refAddress,
-      values.refDistrict,
-      values.refPincode,
-      createdAt,
-      values.doctorId,
-    ];
+      await connection.query(postNewUser, newUservaluesInsert);
 
-    await connection.query(postnewCommunication, newrefCommunicationValue);
+      const newrefCommunicationValue = [
+        getOverallId.rows[0].overAllId,
+        values.isSame ? values.refUserMobileno : values.mobilenumber,
+        values.refUserEmail,
+        values.refAddress,
+        values.refDistrict,
+        values.refPincode,
+        createdAt,
+        values.doctorId,
+      ];
 
-    const newUserDomainValue = [
-      getOverallId.rows[0].overAllId,
-      password,
-      hashedPassword,
-      createdAt,
-      values.doctorId,
-    ];
+      await connection.query(postnewCommunication, newrefCommunicationValue);
 
-    await connection.query(postnewUserDomain, newUserDomainValue);
+      const newUserDomainValue = [
+        getOverallId.rows[0].overAllId,
+        password,
+        values.isSame ? hashedPassword : await bcrypt.hash(values.userpassword, 10),
+        createdAt,
+        values.doctorId,
+      ];
 
-    //addRelation
-    await connection.query(addRelationQuery, [
-      getOverallId.rows[0].overAllId,
-      values.refUserMobileno,
-      "Family History",
-      true,
-    ]);
+      await connection.query(postnewUserDomain, newUserDomainValue);
 
-    return {
-      status: true,
-    };
+      //addRelation
+      await connection.query(addRelationFamilyQuery, [
+        getOverallId.rows[0].overAllId,
+        values.refUserMobileno,
+        values.realtionType,
+        true,
+        createdAt,
+        values.doctorId
+      ]);
+
+
+      return {
+        status: true,
+      };
+
+    } else {
+      return {
+        message: "Mobile Number Already Exits",
+        status: false
+      }
+    }
+
+
+
+
   } catch (error) {
     await connection.query("ROLLBACK;");
     console.error("Something went Wrong", error);
