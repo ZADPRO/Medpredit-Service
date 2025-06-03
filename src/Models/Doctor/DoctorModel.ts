@@ -886,24 +886,25 @@ export const getCurrentReportPDFModel = async (
   const createdAt = CurrentTime();
 
   console.log("====================================");
-  console.log(reportDate, createdAt);
+  console.log(reportDate, createdAt, doctorId, patientId);
   console.log("====================================");
 
   try {
     const patientResult = await connection.query(getPatientDetail, [patientId]);
-
     const scoreResult = await connection.query(getAllScoreQuery, [
       patientId,
       reportDate,
     ]);
-
+    
     const doctorResult = await connection.query(getDoctorDetailsReport, [
       doctorId,
     ]);
-
-    const scoreVerifyResult = await connection.query(getScoreVerifyReport);
-
-    const categoryResult = await connection.query(getAllCategoryFamilyHistory);
+    
+    console.log("_>_>_>Working")
+    const scoreVerifyResult = await connection.query(getScoreVerifyReport, [1]);
+    console.log("_>_>_>Working905")
+    
+    const categoryResult = await connection.query(getAllCategoryFamilyHistory, [1]);
 
     const treatementDetails = await connection.query(getTreatementDetails, [
       patientId,
