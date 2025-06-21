@@ -398,7 +398,7 @@ export const getQuestionsModels = async (
         const optionResult = await connection.query(getOptions, [optionsValue, 1]);
 
         return {
-          questionId: question.refQId,
+          questionId: parseInt(question.refQId),
           questionText: question.refQuestion,
           questionType: question.refOptionType,
           options: optionResult.rows, // Specific options for this question
