@@ -118,10 +118,10 @@ SELECT
 FROM
   public."refQuestions" ro
 WHERE
-  ro."refQCategoryId" = $1
-  AND ro."refLanCode" = $2
+  CAST(ro."refQCategoryId" AS integer) = $1
+  AND CAST(ro."refLanCode" AS integer) = $2
 ORDER BY
-ro."refPQId"
+  ro."refPQId"
 `;
 
 export const getOptions = `

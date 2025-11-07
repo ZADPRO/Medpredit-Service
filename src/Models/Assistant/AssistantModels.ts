@@ -468,11 +468,12 @@ export const postAnswersModels = async (
       categoryId, 1
     ]);
 
+
     const mappedResult: any = await Promise.all(
       getQuestion.rows.map(async (question) => {
         const optionsValue = question.refOptions.split(",").map(Number);
 
-        const optionResult = await connection.query(getOptions, [optionsValue, getOptions]);
+        const optionResult = await connection.query(getOptions, [optionsValue, 1]);
 
         return optionResult.rows;
       })
